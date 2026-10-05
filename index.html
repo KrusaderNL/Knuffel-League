@@ -2,863 +2,577 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Knuffel Voetbal Manager & Draft</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Knuffel Football League</title>
+    <meta name="theme-color" content="#4f46e5">
     <style>
-        /* Klassieke / Oorspronkelijke Styling */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-            color: #333;
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #3730a3;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --accent: #10b981;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        h1, h2, h3 {
-            color: #1a2a3a;
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding-bottom: 85px;
         }
 
-        .tabs {
-            overflow: hidden;
-            border-bottom: 2px solid #ccc;
-            margin-bottom: 20px;
-            background-color: #fff;
-            border-radius: 5px 5px 0 0;
-        }
-
-        .tab-button {
-            background-color: inherit;
-            float: left;
-            border: none;
-            outline: none;
-            cursor: pointer;
-            padding: 12px 16px;
-            transition: 0.3s;
-            font-size: 15px;
-            font-weight: bold;
-            color: #555;
-        }
-
-        .tab-button:hover {
-            background-color: #ddd;
-        }
-
-        .tab-button.active {
-            background-color: #007bff;
+        header {
+            background: linear-gradient(135deg, #4f46e5, #3730a3);
             color: white;
+            padding: 18px 16px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
         }
 
-        .tab-content {
-            display: none;
-            padding: 20px;
-            background-color: #fff;
-            border: 1px solid #ccc;
-            border-top: none;
-            border-radius: 0 0 5px 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        header h1 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
         }
 
-        .active-content {
-            display: block;
+        header p {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            margin-top: 3px;
         }
 
-        /* Buttons & Controls */
-        .btn {
-            background-color: #28a745;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .btn:hover {
-            background-color: #218838;
-        }
-
-        .btn:disabled {
-            background-color: #6c757d;
-            cursor: not-allowed;
-        }
-
-        .select-box {
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-            margin-bottom: 15px;
-        }
-
-        /* Draft list layout */
-        .draft-container {
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
             display: flex;
-            gap: 20px;
+            justify-content: space-around;
+            padding: 6px 0;
+            border-top: 1px solid var(--border);
+            z-index: 1000;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
+            overflow-x: auto;
         }
 
-        .draft-list {
-            flex: 2;
-        }
-
-        .draft-log-box {
+        nav button {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            cursor: pointer;
+            min-width: 50px;
+            padding: 4px 0;
+            font-weight: 500;
             flex: 1;
-            background: #f8f9fa;
-            border: 1px solid #ddd;
-            padding: 10px;
-            height: 350px;
-            overflow-y: auto;
-            border-radius: 4px;
-            font-size: 13px;
         }
 
-        .player-row {
+        nav button.active {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 12px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+
+        .card h2 {
+            font-size: 1.05rem;
+            margin-bottom: 12px;
+            color: var(--primary-dark);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 12px;
-            border: 1px solid #eee;
-            margin-bottom: 5px;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 11px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-success { background: var(--accent); }
+        .btn-warning { background: #f59e0b; }
+        .btn-secondary { background: #64748b; }
+        .btn-sm { padding: 6px 10px; font-size: 0.75rem; width: auto; border-radius: 6px; }
+        .btn-danger { background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer; padding: 4px 8px; }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            outline: none;
             background: #fff;
-            border-radius: 4px;
         }
 
-        /* Live center layout */
-        .live-grid {
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px 4px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th { color: var(--text-muted); font-weight: 600; font-size: 0.75rem; }
+
+        .badge {
+            background: #e0e7ff;
+            color: var(--primary-dark);
+            padding: 2px 7px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .badge-pos {
+            background: #f1f5f9;
+            color: #334155;
+            font-size: 0.65rem;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        .match-card {
+            border-left: 4px solid var(--primary);
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            border-left-width: 4px;
+        }
+
+        .match-card.active-round {
+            border: 2px solid var(--primary);
+            background: #eff6ff;
+        }
+
+        .match-header {
+            font-weight: 700;
             display: flex;
-            gap: 20px;
-            margin-top: 15px;
+            justify-content: space-between;
+            font-size: 0.85rem;
         }
 
-        .lineup-box {
-            flex: 1;
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            padding: 15px;
-            border-radius: 5px;
+        .timeline-event {
+            font-size: 0.78rem;
+            padding: 3px 0;
+            border-bottom: 1px dashed var(--border);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .lineup-table {
-            width: 100%;
-            border-collapse: collapse;
+        .timeline-event:last-child { border-bottom: none; }
+
+        .live-banner {
+            background: #0f172a;
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
+            margin-bottom: 12px;
         }
 
-        .lineup-table td {
-            padding: 6px;
-            border-bottom: 1px solid #eee;
+        .live-timer {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #10b981;
+            text-align: center;
         }
 
-        .player-sent-off {
-            text-decoration: line-through;
-            color: #dc3545;
-            background-color: #f8d7da;
-        }
-
-        .match-ticker {
-            background-color: #222;
-            color: #00ff66;
-            font-family: 'Courier New', Courier, monospace;
+        .draft-box {
+            background: #f0fdf4;
+            border: 1px dashed var(--accent);
             padding: 12px;
-            height: 220px;
-            overflow-y: auto;
-            border-radius: 4px;
-            margin-top: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            margin: 10px 0;
         }
 
-        /* Tables */
-        table.data-table {
-            width: 100%;
-            border-collapse: collapse;
+        .draft-teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 8px;
             margin-top: 10px;
         }
 
-        table.data-table th, table.data-table td {
-            border: 1px solid #ddd;
-            padding: 8px 12px;
-            text-align: left;
+        .draft-team-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 0.75rem;
         }
 
-        table.data-table th {
-            background-color: #f2f2f2;
+        .draft-team-card h4 {
+            font-size: 0.8rem;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 2px;
         }
 
-        /* Newspaper */
-        .newspaper-article {
-            border-bottom: 2px solid #222;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+        .newspaper-card {
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
-        .newspaper-headline {
-            font-size: 18px;
+        .newspaper-title {
+            font-family: Georgia, serif;
             font-weight: bold;
-            color: #111;
-            margin-bottom: 8px;
+            font-size: 1.15rem;
+            border-bottom: 2px solid #000;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+            color: #1e1b4b;
         }
 
         .newspaper-anecdote {
-            background-color: #fff9e6;
-            border-left: 4px solid #ffc107;
-            padding: 10px 15px;
+            background: #fef3c7;
+            border-left: 3px solid #f59e0b;
+            padding: 8px 12px;
             margin: 10px 0;
             font-style: italic;
+            font-size: 0.82rem;
+            border-radius: 0 6px 6px 0;
         }
 
-        .pos-badge {
-            display: inline-block;
-            width: 22px;
-            text-align: center;
-            font-weight: bold;
-            border-radius: 3px;
-            color: white;
-            font-size: 11px;
-            padding: 2px 0;
+        .lineup-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-top: 4px;
         }
-        .pos-K { background-color: #ff9800; }
-        .pos-V { background-color: #2196F3; }
-        .pos-M { background-color: #4CAF50; }
-        .pos-A { background-color: #f44336; }
+
+        .lineup-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.72rem;
+        }
     </style>
 </head>
 <body>
 
-<h1>🧸 Knuffel Voetbal Manager</h1>
+    <header>
+        <h1>🧸 Knuffel Football League</h1>
+        <p id="league-status">Status: Voorbereiding (8 Teams)</p>
+    </header>
 
-<div class="tabs">
-    <button class="tab-button active" onclick="openTab(event, 'tab-draft')">1. Draft</button>
-    <button class="tab-button" onclick="openTab(event, 'tab-teams')">2. Teams & Progressie</button>
-    <button class="tab-button" onclick="openTab(event, 'tab-live')">3. Live Center</button>
-    <button class="tab-button" onclick="openTab(event, 'tab-results')">4. Uitslagen & Stand</button>
-    <button class="tab-button" onclick="openTab(event, 'tab-krant')">5. De Knuffelkrant</button>
-    <button class="tab-button" onclick="openTab(event, 'tab-stats')">6. Statistieken</button>
-    <button class="tab-button" onclick="openTab(event, 'tab-cl')">7. Champions League</button>
-</div>
+    <div class="container">
 
-<!-- 1. DRAFT TAB -->
-<div id="tab-draft" class="tab-content active-content">
-    <h2>Spelers Draft</h2>
-    <p>Selecteer om de beurt een knuffel. Tegenstanders kiezen automatisch (Snelheid: <strong>2 seconden per speler</strong>).</p>
-    <button id="btn-start-draft" class="btn" onclick="startDraft()">Start Draft</button>
-    <br><br>
-    <div class="draft-container">
-        <div class="draft-list">
-            <h3>Beschikbare Knuffels</h3>
-            <div id="draft-available-players"></div>
-        </div>
-        <div class="draft-log-box">
-            <h3>Draft Verloop</h3>
-            <div id="draft-log"></div>
-        </div>
-    </div>
-</div>
+        <!-- TAB 1: SETUP -->
+        <div id="tab-setup" class="tab-content active">
+            <div class="card">
+                <h2>1. Knuffels Invoeren</h2>
+                <div id="setup-form">
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">
+                        Voeg knuffelnamen toe. Er zijn exact <strong>32 knuffels</strong> nodig (4 per team: GK, DEF, MID, ATT).
+                    </p>
+                    <textarea id="bulk-plushies" rows="3" placeholder="Plak hier je knuffelnamen, bijv:&#10;Fluffie Beer&#10;Snuffel Konijn&#10;Tijger Tije"></textarea>
+                    <div style="display: flex; gap: 6px; margin-bottom: 10px;">
+                        <button class="btn" type="button" onclick="addBulkPlushies()">📋 Voeg Lijst Toe</button>
+                        <button class="btn btn-warning" type="button" onclick="autoFillPlushies()">✨ Vul aan tot 32</button>
+                    </div>
+                </div>
 
-<!-- 2. TEAMS & PROGRESSIE TAB -->
-<div id="tab-teams" class="tab-content">
-    <h2>Teams & Progressie Overzicht</h2>
-    <div id="teams-overview-container"></div>
-</div>
-
-<!-- 3. LIVE CENTER TAB -->
-<div id="tab-live" class="tab-content">
-    <h2>Live Center</h2>
-    <label for="live-match-select"><strong>Kies Wedstrijd:</strong> </label>
-    <select id="live-match-select" class="select-box"></select>
-    <button class="btn" onclick="playLiveMatch()">Speel Wedstrijd Live</button>
-
-    <div class="live-grid">
-        <div class="lineup-box">
-            <h3 id="live-home-title">Thuis</h3>
-            <table class="lineup-table">
-                <tbody id="live-home-lineup"></tbody>
-            </table>
-        </div>
-        <div class="lineup-box">
-            <h3 id="live-away-title">Uit</h3>
-            <table class="lineup-table">
-                <tbody id="live-away-lineup"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <h3>Wedstrijd Ticker</h3>
-    <div id="live-ticker" class="match-ticker">Kies een wedstrijd en klik op 'Speel Wedstrijd Live'...</div>
-</div>
-
-<!-- 4. UITSLAGEN & STAND TAB -->
-<div id="tab-results" class="tab-content">
-    <h2>Uitslagen & Competitiestand</h2>
-    
-    <label for="round-select-popup"><strong>Selecteer Speelronde:</strong> </label>
-    <select id="round-select-popup" class="select-box" onchange="renderRoundResults()">
-        <!-- Wordt gevuld via JS -->
-    </select>
-
-    <div id="round-results-list"></div>
-
-    <h3 style="margin-top:25px;">Competitiestand</h3>
-    <table class="data-table" id="standings-table">
-        <thead>
-            <tr>
-                <th>#</th><th>Team</th><th>GS</th><th>W</th><th>G</th><th>V</th><th>DV</th><th>DT</th><th>DS</th><th>Ptn</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-</div>
-
-<!-- 5. DE KNUFFELKRANT TAB -->
-<div id="tab-krant" class="tab-content">
-    <h2>📰 De Knuffelkrant</h2>
-    <div id="krant-articles-container"><i>Nog geen krantenkoppen. Speel eerst wedstrijden in het Live Center!</i></div>
-</div>
-
-<!-- 6. STATISTIEKEN TAB -->
-<div id="tab-stats" class="tab-content">
-    <h2>Statistieken</h2>
-    <div style="display:flex; gap:20px;">
-        <div style="flex:1;">
-            <h3>⚽ Topscorers</h3>
-            <table class="data-table">
-                <thead><tr><th>Speler</th><th>Team</th><th>Goals</th></tr></thead>
-                <tbody id="topscorers-tbody"></tbody>
-            </table>
-        </div>
-        <div style="flex:1;">
-            <h3>🧤 Clean Sheets (Uitsluitend Keepers)</h3>
-            <table class="data-table">
-                <thead><tr><th>Keeper</th><th>Team</th><th>Clean Sheets</th></tr></thead>
-                <tbody id="cleansheets-tbody"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- 7. CHAMPIONS LEAGUE TAB -->
-<div id="tab-cl" class="tab-content">
-    <h2>🏆 Knuffel Champions League</h2>
-    <button class="btn" onclick="simulateCLMatch()">Simuleer Champions League Wedstrijd</button>
-    <div id="cl-results-container" style="margin-top:15px;"></div>
-</div>
-
-<script>
-// --- UITGEBREIDE POOLS VOOR EXTRA VARIATIE ---
-const FIRST_NAMES = [
-    "Bartholomeus", "Pluisje", "Fluffy", "Snuggles", "Wobbly", "Barnaby", "Knoest", "Bubbles",
-    "Pebbels", "Ziggy", "Pip", "Bella", "Nala", "Teddy", "Sammie", "Bruno", "Coco", "Milo",
-    "Ollie", "Simba", "Loki", "Guus", "Bram", "Dropje", "Boefje", "Sproet", "Kruimel", "Rakker",
-    "Toby", "Felix", "Oscar", "Pepper", "Panda", "Waffel", "Muffin", "Pannenkoek", "Binky",
-    "Waggel", "Knabbel", "Babbel", "Woefie", "Vlekje", "Snoetje", "Kiezeltje", "Dribbel", "Boris",
-    "Balou", "Lancelot", "Sprookje", "Tijger", "Zwabber", "Pluche", "Bontje", "Toffie", "Karamel"
-];
-
-const LAST_NAMES = [
-    "Beer", "Konijn", "Aap", "Tijger", "Olifant", "Pinguïn", "Vos", "Panda", "Koala", "Leeuw",
-    "Drakie", "Eend", "Kater", "Hondje", "Kangoeroe", "Luiaard", "Nijlpaard", "Egel", "Hamster",
-    "Zebra", "Giraffe", "Wasbeer", "Otter", "Eekhoorn", "Bever", "Dolfijn", "Zeehond", "Ijsbeer",
-    "Pony", "Uil", "Panter", "Lammetje", "Veulen", "Eland", "Dino", "Stinkdier"
-];
-
-const COMPETITION_TEAMS_POOL = [
-    "FC Pluisstad", "Knoestig United", "Wobbly Wanderers", "Vliegende Vosjes", "Kattenkwaad VV",
-    "Knikkerbos Boys", "Dierenbos City", "Berenburg FC", "Pluche Rovers", "Zachte Zijde FC",
-    "Droomduin Athletic", "Katoen Club", "Wollen Wanten FC", "Fluwelen Trappers", "Paddington FC",
-    "Stoffige Stormers", "Speelgoed Sport", "Bamboe Beertjes", "Oerwoud Oranje", "Kneuterdijk FC",
-    "Zandbak Stars", "Kussenkasteel FC", "Teddy Town", "Pluche Paladins", "Donzige Dynamiet"
-];
-
-const CL_TEAMS_POOL = [
-    "Real Pluisje FC", "Bayern Beertjes", "Paris Saint-Knuffel", "FC Barcelona Pluche", "Inter Teddy",
-    "Juventus Vosjes", "Borussia Bamboe", "Arsenal Aapjes", "AC Cuddles", "Sporting Snuggles",
-    "Benfica Bontjes", "Celtic Cotton", "Ajax Amsterdam Pluche", "Porto Pinguïns", "Galatasaray Gummibeertjes"
-];
-
-const ANECDOTES_POOL = [
-    "WOEDELOSE FANS: In de 34e minuut werd de wedstrijd kort stilgelegd omdat een losgelopen knuffelhond het veld op rende en ervandoor ging met de wedstrijdbal.",
-    "PLUCHELOSSING: Middenvelder Snuggles moest in de rust behandeld worden aan een scheur in de zijkant. Met behulp van een spoed-naaisetje kon hij gelukkig de tweede helft uitspelen.",
-    "VELDCONDITIE: De grensrechter klaagde na afloop over te veel vulling op het veld na een paar felle tackle-partijen op het middenveld.",
-    "SCHOENENWISSEL: Keeper Fluffy viel op toen hij in de tweede helft met twee verschillende slofjes het veld opkwam. 'Ze zaten simpelweg lekkerder,' verklaarde hij lachend."
-];
-
-const POSITIONS = ["K", "V", "M", "A"];
-
-// --- GAME STATE ---
-let teams = [];
-let availablePlayers = [];
-let userTeamIndex = 0;
-let currentDraftPick = 0;
-let isDrafting = false;
-let fixtures = [];
-
-// --- UTILITY SHUFFLE & RANDOM FUNCTIONS ---
-function shuffleArray(array) {
-    let arr = [...array];
-    for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-}
-
-function getRandomItem(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
-}
-
-function generateRandomName() {
-    return `${getRandomItem(FIRST_NAMES)} ${getRandomItem(LAST_NAMES)}`;
-}
-
-function generatePlayer(id) {
-    const pos = getRandomItem(POSITIONS);
-    const ovr = Math.floor(Math.random() * 20) + 65; // 65-85
-    const growthPotential = Math.floor(Math.random() * 8) + 2; // +2 tot +10
-    return {
-        id: id,
-        name: generateRandomName(),
-        position: pos,
-        overall: ovr,
-        startOverall: ovr,
-        expectedGrowth: growthPotential,
-        goals: 0,
-        cleanSheets: 0,
-        yellowCards: 0,
-        isRedCarded: false
-    };
-}
-
-// --- INITIALISATIE ---
-function initGame() {
-    let shuffledNames = shuffleArray(COMPETITION_TEAMS_POOL);
-    teams = [
-        { name: "Mijn Knuffel Team (Jij)", players: [], stats: { gs:0, w:0, g:0, v:0, dv:0, dt:0, ptn:0 } },
-        { name: shuffledNames[0], players: [], stats: { gs:0, w:0, g:0, v:0, dv:0, dt:0, ptn:0 } },
-        { name: shuffledNames[1], players: [], stats: { gs:0, w:0, g:0, v:0, dv:0, dt:0, ptn:0 } },
-        { name: shuffledNames[2], players: [], stats: { gs:0, w:0, g:0, v:0, dv:0, dt:0, ptn:0 } }
-    ];
-
-    // Genereer 32 unieke spelers voor draft pool
-    availablePlayers = [];
-    for (let i = 1; i <= 32; i++) {
-        availablePlayers.push(generatePlayer(i));
-    }
-
-    renderDraftBoard();
-    generateFixtures();
-    renderSetupRoundPicker();
-}
-
-function openTab(evt, tabId) {
-    let tabcontent = document.getElementsByClassName("tab-content");
-    for (let i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].classList.remove("active-content");
-    }
-    let tabbuttons = document.getElementsByClassName("tab-button");
-    for (let i = 0; i < tabbuttons.length; i++) {
-        tabbuttons[i].classList.remove("active");
-    }
-    document.getElementById(tabId).classList.add("active-content");
-    evt.currentTarget.classList.add("active");
-
-    if (tabId === 'tab-teams') renderTeamsOverview();
-    if (tabId === 'tab-results') renderRoundResults();
-    if (tabId === 'tab-stats') renderStats();
-    if (tabId === 'tab-live') setupLiveCenter();
-}
-
-// --- 1. DRAFT LOGICA (2 SECONDEN PER BEURT) ---
-function renderDraftBoard() {
-    const container = document.getElementById('draft-available-players');
-    container.innerHTML = '';
-
-    availablePlayers.forEach(p => {
-        const div = document.createElement('div');
-        div.className = 'player-row';
-        div.innerHTML = `
-            <div>
-                <span class="pos-badge pos-${p.position}">${p.position}</span>
-                <strong>${p.name}</strong> (OVR: ${p.overall} | Potentie: +${p.expectedGrowth})
+                <div>
+                    <p style="font-size: 0.85rem; font-weight: bold; margin-bottom: 6px;">
+                        Geselecteerde Knuffels: <span id="plushie-count">0</span> / 32
+                    </p>
+                    <div id="plushie-list-container" style="max-height: 180px; overflow-y: auto;">
+                        <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 15px;">Nog geen knuffels toegevoegd.</p>
+                    </div>
+                </div>
             </div>
-            ${isDrafting && currentDraftPick % 4 === userTeamIndex ? 
-                `<button class="btn" onclick="userPickPlayer(${p.id})">Kies</button>` : ''}
-        `;
-        container.appendChild(div);
-    });
-}
 
-function logDraft(msg) {
-    const log = document.getElementById('draft-log');
-    log.innerHTML += `<div>${msg}</div>`;
-    log.scrollTop = log.scrollHeight;
-}
-
-function startDraft() {
-    document.getElementById('btn-start-draft').disabled = true;
-    isDrafting = true;
-    logDraft("--- START VAN DE DRAFT (2 seconden per speler) ---");
-    processDraftTurn();
-}
-
-function processDraftTurn() {
-    if (availablePlayers.length === 0 || currentDraftPick >= 24) { // 6 spelers per team
-        isDrafting = false;
-        logDraft("<b>Draft afgerond! Alle teams zijn compleet.</b>");
-        renderDraftBoard();
-        return;
-    }
-
-    let teamTurn = currentDraftPick % 4;
-    logDraft(`Pick ${currentDraftPick + 1}: ${teams[teamTurn].name} denkt na...`);
-
-    renderDraftBoard();
-
-    if (teamTurn !== userTeamIndex) {
-        // CPU kiest na exact 2 seconden
-        setTimeout(() => {
-            availablePlayers.sort((a, b) => b.overall - a.overall);
-            let picked = availablePlayers.shift();
-            teams[teamTurn].players.push(picked);
-            logDraft(`🤖 <strong>${teams[teamTurn].name}</strong> kiest <strong>${picked.name}</strong> [${picked.position}]`);
-            currentDraftPick++;
-            processDraftTurn();
-        }, 2000); // 2000 ms = 2 seconden
-    }
-}
-
-function userPickPlayer(id) {
-    if (!isDrafting || currentDraftPick % 4 !== userTeamIndex) return;
-
-    let index = availablePlayers.findIndex(p => p.id === id);
-    if (index !== -1) {
-        let picked = availablePlayers.splice(index, 1)[0];
-        teams[userTeamIndex].players.push(picked);
-        logDraft(`👤 <strong>Jij</strong> koos <strong>${picked.name}</strong> [${picked.position}]`);
-        currentDraftPick++;
-        processDraftTurn();
-    }
-}
-
-// --- 2. TEAMS & PROGRESSIE OVERZICHT ---
-function renderTeamsOverview() {
-    const container = document.getElementById('teams-overview-container');
-    container.innerHTML = '';
-
-    teams.forEach(team => {
-        let html = `<h3>${team.name}</h3>`;
-        html += `<table class="data-table">
-            <thead>
-                <tr>
-                    <th>Pos</th>
-                    <th>Volledige Naam</th>
-                    <th>Begin OVR</th>
-                    <th>Huidige OVR</th>
-                    <th>Gemaakte Progressie</th>
-                    <th>Verwachte Progressie / Potentie</th>
-                </tr>
-            </thead>
-            <tbody>`;
-        
-        team.players.forEach(p => {
-            let gained = p.overall - p.startOverall;
-            html += `<tr>
-                <td><span class="pos-badge pos-${p.position}">${p.position}</span></td>
-                <td><strong>${p.name}</strong></td>
-                <td>${p.startOverall}</td>
-                <td><strong>${p.overall}</strong></td>
-                <td><span style="color:green; font-weight:bold;">+${gained} OVR</span></td>
-                <td><span style="color:#0056b3; font-weight:bold;">Max +${p.expectedGrowth} OVR</span></td>
-            </tr>`;
-        });
-
-        html += `</tbody></table><br>`;
-        container.innerHTML += html;
-    });
-}
-
-// --- SPEELSCHEMA GENERATOR ---
-function generateFixtures() {
-    fixtures = [
-        { round: 1, home: 0, away: 1, played: false, scoreH: 0, scoreA: 0, log: [] },
-        { round: 1, home: 2, away: 3, played: false, scoreH: 0, scoreA: 0, log: [] },
-        { round: 2, home: 0, away: 2, played: false, scoreH: 0, scoreA: 0, log: [] },
-        { round: 2, home: 1, away: 3, played: false, scoreH: 0, scoreA: 0, log: [] },
-        { round: 3, home: 3, away: 0, played: false, scoreH: 0, scoreA: 0, log: [] },
-        { round: 3, home: 1, away: 2, played: false, scoreH: 0, scoreA: 0, log: [] },
-    ];
-}
-
-// --- 3. LIVE CENTER (Met 2x Geel = Rood & Volledige Naam/Positie) ---
-function setupLiveCenter() {
-    const select = document.getElementById('live-match-select');
-    select.innerHTML = '';
-    fixtures.forEach((f, idx) => {
-        select.innerHTML += `<option value="${idx}">Ronde ${f.round}: ${teams[f.home].name} vs ${teams[f.away].name} ${f.played ? '(Gespeeld)' : ''}</option>`;
-    });
-    updateLiveDisplay();
-    select.onchange = updateLiveDisplay;
-}
-
-function updateLiveDisplay() {
-    const idx = document.getElementById('live-match-select').value;
-    if (idx === undefined || !fixtures[idx]) return;
-    const match = fixtures[idx];
-
-    document.getElementById('live-home-title').innerText = teams[match.home].name;
-    document.getElementById('live-away-title').innerText = teams[match.away].name;
-
-    renderLineupRows('live-home-lineup', teams[match.home].players);
-    renderLineupRows('live-away-lineup', teams[match.away].players);
-}
-
-function renderLineupRows(tbodyId, players) {
-    const tbody = document.getElementById(tbodyId);
-    tbody.innerHTML = '';
-    players.forEach(p => {
-        let statusClass = p.isRedCarded ? 'player-sent-off' : '';
-        let cardDisplay = '';
-        if (p.isRedCarded) cardDisplay = ' 🟥 ROOD';
-        else if (p.yellowCards === 1) cardDisplay = ' 🟨 GEEL';
-
-        tbody.innerHTML += `<tr class="${statusClass}">
-            <td><span class="pos-badge pos-${p.position}">${p.position}</span></td>
-            <td><strong>${p.name}</strong></td>
-            <td>OVR: ${p.overall}${cardDisplay}</td>
-        </tr>`;
-    });
-}
-
-function playLiveMatch() {
-    const idx = document.getElementById('live-match-select').value;
-    const match = fixtures[idx];
-    const ticker = document.getElementById('live-ticker');
-    ticker.innerHTML = '--- AFTRAP VAN DE WEDSTRIJD ---<br>';
-
-    let homeTeam = teams[match.home];
-    let awayTeam = teams[match.away];
-
-    // Resetten van tijdelijke wedstrijd-kaarten
-    [...homeTeam.players, ...awayTeam.players].forEach(p => { p.yellowCards = 0; p.isRedCarded = false; });
-
-    let scoreH = 0;
-    let scoreA = 0;
-    let logs = [];
-
-    for (let min = 10; min <= 90; min += 9) {
-        let isHomeAttacking = Math.random() > 0.5;
-        let attTeam = isHomeAttacking ? homeTeam : awayTeam;
-        let defTeam = isHomeAttacking ? awayTeam : homeTeam;
-
-        // Alleen actieve (niet-rood geschorste) spelers
-        let attackers = attTeam.players.filter(p => !p.isRedCarded && p.position !== 'K');
-        let defenders = defTeam.players.filter(p => !p.isRedCarded);
-
-        if (attackers.length === 0) continue;
-
-        let roll = Math.random();
-
-        if (roll < 0.35) { // DOELPUNT
-            let scorer = getRandomItem(attackers);
-            if (isHomeAttacking) scoreH++; else scoreA++;
-            scorer.goals++;
-            logs.push(`${min}' ⚽ GOAL! Doelpunt voor ${attTeam.name}! Prachtige uithaal van ${scorer.name} [${scorer.position}]!`);
-        } else if (roll < 0.65) { // KAART EVENT
-            let offender = getRandomItem(defenders);
-            if (offender) {
-                offender.yellowCards++;
-                if (offender.yellowCards === 2) {
-                    offender.isRedCarded = true;
-                    logs.push(`${min}' 🟨🟥 TWEEDE GELE KAART! ${offender.name} [${offender.position}] overtreedt de regels opnieuw en moet met ROOD van het veld! ${defTeam.name} speelt met 1 man minder!`);
-                } else {
-                    logs.push(`${min}' 🟨 Gele kaart voor ${offender.name} [${offender.position}] na een stevige overtreding.`);
-                }
-            }
-        } else {
-            logs.push(`${min}' Gevaarlijke aanval van ${attTeam.name}, maar de verdediging ruimt op.`);
-        }
-    }
-
-    match.played = true;
-    match.scoreH = scoreH;
-    match.scoreA = scoreA;
-
-    // Clean sheet toekennen aan keepers
-    if (scoreA === 0) {
-        let hk = homeTeam.players.find(p => p.position === 'K');
-        if (hk) hk.cleanSheets++;
-    }
-    if (scoreH === 0) {
-        let ak = awayTeam.players.find(p => p.position === 'K');
-        if (ak) ak.cleanSheets++;
-    }
-
-    updateStandings(match.home, match.away, scoreH, scoreA);
-
-    // Mogelijke progressie na wedstrijd
-    [...homeTeam.players, ...awayTeam.players].forEach(p => {
-        if (Math.random() < 0.35 && (p.overall - p.startOverall) < p.expectedGrowth) {
-            p.overall += 1;
-        }
-    });
-
-    logs.forEach(l => ticker.innerHTML += l + '<br>');
-    ticker.innerHTML += `<b>--- EINDSTAND: ${scoreH} - ${scoreA} ---</b>`;
-
-    updateLiveDisplay();
-    addArticlesToNewspaper(match, homeTeam, awayTeam);
-    setupLiveCenter();
-}
-
-function updateStandings(hIdx, aIdx, sH, sA) {
-    let h = teams[hIdx].stats;
-    let a = teams[aIdx].stats;
-
-    h.gs++; a.gs++;
-    h.dv += sH; h.dt += sA;
-    a.dv += sA; a.dt += sH;
-
-    if (sH > sA) { h.w++; h.ptn += 3; a.v++; }
-    else if (sA > sH) { a.w++; a.ptn += 3; h.v++; }
-    else { h.g++; h.ptn += 1; a.g++; a.ptn += 1; }
-}
-
-// --- 4. UITSLAGEN & STAND (Met Pop-up/Dropdown Menu) ---
-function renderSetupRoundPicker() {
-    const popup = document.getElementById('round-select-popup');
-    popup.innerHTML = '';
-    for (let r = 1; r <= 3; r++) {
-        popup.innerHTML += `<option value="${r}">Speelronde ${r}</option>`;
-    }
-    renderRoundResults();
-    renderStandingsTable();
-}
-
-function renderRoundResults() {
-    const selectedRound = document.getElementById('round-select-popup').value;
-    const container = document.getElementById('round-results-list');
-    container.innerHTML = `<h3>Uitslagen Ronde ${selectedRound}</h3>`;
-
-    let roundMatches = fixtures.filter(f => f.round == selectedRound);
-    roundMatches.forEach(m => {
-        let text = m.played ? `${m.scoreH} - ${m.scoreA}` : 'Nog niet gespeeld';
-        container.innerHTML += `<div style="padding: 8px 0; border-bottom: 1px solid #eee;">
-            <strong>${teams[m.home].name}</strong> ${text} <strong>${teams[m.away].name}</strong>
-        </div>`;
-    });
-}
-
-function renderStandingsTable() {
-    let sorted = [...teams].sort((a, b) => b.stats.ptn - a.stats.ptn || (b.stats.dv - b.stats.dt) - (a.stats.dv - a.stats.dt));
-    const tbody = document.querySelector('#standings-table tbody');
-    tbody.innerHTML = '';
-
-    sorted.forEach((t, i) => {
-        let ds = t.stats.dv - t.stats.dt;
-        tbody.innerHTML += `<tr>
-            <td>${i + 1}</td>
-            <td><strong>${t.name}</strong></td>
-            <td>${t.stats.gs}</td>
-            <td>${t.stats.w}</td>
-            <td>${t.stats.g}</td>
-            <td>${t.stats.v}</td>
-            <td>${t.stats.dv}</td>
-            <td>${t.stats.dt}</td>
-            <td>${ds > 0 ? '+' + ds : ds}</td>
-            <td><strong>${t.stats.ptn}</strong></td>
-        </tr>`;
-    });
-}
-
-// --- 5. DE KNUFFELKRANT (Langere verhalen & Unieke Anecdotes) ---
-function addArticlesToNewspaper(match, homeTeam, awayTeam) {
-    const container = document.getElementById('krant-articles-container');
-    
-    let redCardNotice = "";
-    let sentOff = [...homeTeam.players, ...awayTeam.players].filter(p => p.isRedCarded);
-    if (sentOff.length > 0) {
-        let p = sentOff[0];
-        redCardNotice = `
-        <div class="newspaper-article">
-            <div class="newspaper-headline">🚨 RODE KAART DRAMA: ${p.name} mag vroegtijdig gaan douchen!</div>
-            <p>Een hectisch moment in Speelronde ${match.round}: ${p.name} [${p.position}] kreeg na een tweede onbesuisde actie direct rood van de arbiter. Het verlies van een speler zorgde voor grote tactische problemen op het veld. "Dit is heel erg zuur voor de ploeg," verzuchtte de coach in het interview na afloop.</p>
-        </div>`;
-    }
-
-    let anecdote = getRandomItem(ANECDOTES_POOL);
-
-    let html = `
-        <div class="newspaper-article">
-            <div class="newspaper-headline">SPEELRONDE ${match.round}: KRAAKHELDER SPECTAKEL TUSSEN ${homeTeam.name.toUpperCase()} EN ${awayTeam.name.toUpperCase()}</div>
-            <p>De ontmoeting tussen <strong>${homeTeam.name}</strong> en <strong>${awayTeam.name}</strong> heeft de gemoederen flink beziggehouden. Met een eindstand van <strong>${match.scoreH} - ${match.scoreA}</strong> keken de toeschouwers hun ogen uit. De intensiteit lag ongekend hoog op de pluche mat.</p>
-            <div class="newspaper-anecdote"><strong>Anekdote van de Speelronde:</strong> ${anecdote}</div>
-            <p>Beide teams lieten tactisch sterk voetbal zien, maar de individuele klasse van de aanvallers gaf uiteindelijk de doorslag. Analisten verwachten dat deze uitslag grote gevolgen heeft voor het verloop van het kampioenschap.</p>
+            <div class="card" id="start-card">
+                <h2>2. Live Team Loting (Draft)</h2>
+                <div id="draft-live-area" style="display: none;" class="draft-box">
+                    <div id="draft-text">Loting starten...</div>
+                </div>
+                <button class="btn btn-success" id="start-draft-btn" type="button" onclick="startDraft()">🎲 Start Live Loting (2 sec per speler)</button>
+                
+                <div id="draft-teams-overview" class="draft-teams-grid" style="display: none;"></div>
+            </div>
         </div>
-        ${redCardNotice}
-    `;
 
-    container.innerHTML = html + container.innerHTML;
-}
-
-// --- 6. STATISTIEKEN (Clean sheets ALLEEN Keepers) ---
-function renderStats() {
-    let allPlayers = [];
-    teams.forEach(t => {
-        t.players.forEach(p => {
-            allPlayers.push({ ...p, teamName: t.name });
-        });
-    });
-
-    // Topscorers
-    let topScorers = [...allPlayers].sort((a, b) => b.goals - a.goals).slice(0, 5);
-    const scorerBody = document.getElementById('topscorers-tbody');
-    scorerBody.innerHTML = '';
-    topScorers.forEach(p => {
-        scorerBody.innerHTML += `<tr><td><strong>${p.name}</strong> [${p.position}]</td><td>${p.teamName}</td><td><strong>${p.goals}</strong></td></tr>`;
-    });
-
-    // Clean Sheets - UITSLUITEND KEEPERS
-    let keepers = allPlayers.filter(p => p.position === 'K');
-    let topKeepers = keepers.sort((a, b) => b.cleanSheets - a.cleanSheets).slice(0, 5);
-    
-    const keeperBody = document.getElementById('cleansheets-tbody');
-    keeperBody.innerHTML = '';
-    topKeepers.forEach(p => {
-        keeperBody.innerHTML += `<tr><td>🧤 <strong>${p.name}</strong></td><td>${p.teamName}</td><td><strong>${p.cleanSheets}</strong></td></tr>`;
-    });
-}
-
-// --- 7. CHAMPIONS LEAGUE SIMULATIE ---
-function simulateCLMatch() {
-    const container = document.getElementById('cl-results-container');
-    let myTeam = teams[userTeamIndex];
-
-    if (myTeam.players.length === 0) {
-        container.innerHTML = "<p style='color:red;'><strong>Rond eerst de draft af om een team te vormen!</strong></p>";
-        return;
-    }
-
-    let opponentTeamName = getRandomItem(CL_TEAMS_POOL);
-    let myScorer = getRandomItem(myTeam.players).name;
-    let oppScorer = generateRandomName();
-
-    let myGoals = Math.floor(Math.random() * 4);
-    let oppGoals = Math.floor(Math.random() * 4);
-
-    let html = `
-        <div style="border: 1px solid #ffc107; background: #fffdf5; padding: 15px; border-radius: 5px; margin-bottom: 15px;">
-            <h3 style="color:#d39e00; margin-top:0;">🇪🇺 Europees Affiche</h3>
-            <h4>${myTeam.name} ${myGoals} - ${oppGoals} ${opponentTeamName}</h4>
-            <p><strong>Doelpuntenmakers:</strong></p>
-            <ul>
-                <li>${myTeam.name}: ${myGoals > 0 ? myScorer + ' (' + myGoals + 'x)' : 'Geen'}</li>
-                <li>${opponentTeamName}: ${oppGoals > 0 ? oppScorer + ' (' + oppGoals + 'x)' : 'Geen'}</li>
-            </ul>
+        <!-- TAB 2: STAND -->
+        <div id="tab-stand" class="tab-content">
+            <div class="card">
+                <h2>Huidige Stand</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Team</th>
+                            <th>G</th>
+                            <th>DV</th>
+                            <th>DT</th>
+                            <th>DS</th>
+                            <th>Pnt</th>
+                        </tr>
+                    </thead>
+                    <tbody id="standings-body"></tbody>
+                </table>
+            </div>
         </div>
-    `;
 
-    container.innerHTML = html + container.innerHTML;
-}
+        <!-- TAB 3: PROGRAMMA -->
+        <div id="tab-program" class="tab-content">
+            <div id="all-rounds-container"></div>
+        </div>
 
-// Start game bij opstarten
-window.onload = initGame;
-</script>
+        <!-- TAB 4: LIVE CENTER -->
+        <div id="tab-live" class="tab-content">
+            <div class="card">
+                <h2>⏱️️ Live Wedstrijd Center</h2>
+                
+                <div id="live-container" style="display: none;" class="live-banner">
+                    <div class="live-timer">Minuut: <span id="live-minute">0</span>'</div>
+                    
+                    <div style="display: flex; justify-content: center; gap: 5px; margin: 10px 0;">
+                        <button class="btn btn-sm btn-secondary" onclick="setSpeed(800)">1x</button>
+                        <button class="btn btn-sm btn-secondary" onclick="setSpeed(300)">2x</button>
+                        <button class="btn btn-sm btn-warning" onclick="setSpeed(50)">⚡ Snel</button>
+                    </div>
 
-</body>
-</html>
+                    <div id="live-matches-detail-container"></div>
+                </div>
+
+                <div id="live-idle-message">
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">Klik op de knop hieronder om de speelronde live te simuleren.</p>
+                    <button class="btn btn-success" id="sim-btn" onclick="startLiveRound()">⚽ Start Live Speelronde</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: UITSLAGEN -->
+        <div id="tab-results" class="tab-content">
+            <div class="card">
+                <h2>📋 Uitslagen & Tijdverloop</h2>
+                <div style="margin-bottom: 12px;">
+                    <label for="results-round-select" style="font-size:0.8rem; font-weight:bold; color:var(--text-muted);">Kies Speelronde:</label>
+                    <select id="results-round-select" onchange="filterResultsByRound()">
+                        <option value="all">Alle Speelrondes</option>
+                    </select>
+                </div>
+                <div id="results-history">
+                    <p style="font-size:0.8rem; color:var(--text-muted);">Nog geen gespeelde wedstrijden.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 6: STATS -->
+        <div id="tab-stats" class="tab-content">
+            <div class="card">
+                <h2>⚽ Topscorers</h2>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Speler</th><th>Team</th><th>Goals</th></tr>
+                    </thead>
+                    <tbody id="topscorers-body"></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>🎯 Assists</h2>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Speler</th><th>Team</th><th>Assists</th></tr>
+                    </thead>
+                    <tbody id="assists-body"></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>🧤 Clean Sheets (Uitsluitend Keepers)</h2>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Keeper</th><th>Team</th><th>Clean Sheets</th></tr>
+                    </thead>
+                    <tbody id="cleansheets-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 7: SPELERS PER TEAM -->
+        <div id="tab-players" class="tab-content">
+            <div class="card">
+                <h2>Selecties & Statistieken</h2>
+                <select id="team-select-filter" onchange="renderTeamPlayers()"></select>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pos</th>
+                            <th>Speler</th>
+                            <th>Rat.</th>
+                            <th>Prog.</th>
+                            <th>Verw. Prog.</th>
+                            <th>G</th>
+                            <th>A</th>
+                            <th>🟨</th>
+                            <th>🟥</th>
+                        </tr>
+                    </thead>
+                    <tbody id="team-players-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 8: TRANSFERS -->
+        <div id="tab-transfers" class="tab-content">
+            <div class="card">
+                <h2>Transfermarkt</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;" id="transfer-info">
+                    Transfers zijn mogelijk in speelronde 7 en na speelronde 14.
+                </p>
+                <button class="btn btn-warning" id="transfer-btn" onclick="performTransfers()" disabled>🔄 Voer Transfers Uit</button>
+                <div id="transfer-feed" style="margin-top: 12px;"></div>
+            </div>
+        </div>
+
+        <!-- TAB 9: KNUFFELKRANT -->
+        <div id="tab-newspaper" class="tab-content">
+            <div id="newspaper-container">
+                <div class="newspaper-card">
+                    <div class="newspaper-title">📰 DE KNUFFELKRANT - Editie 0</div>
+                    <p style="font-size: 0.85rem;">Welkom bij het nieuwe seizoen van de Knuffel Football League! Zodra de draft afgerond is en de wedstrijden losbarsten, lees je hier uitgebreide wedstrijdverslagen en hilarische anekdotes uit de catacomben!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 10: CHAMPIONS LEAGUE -->
+        <div id="tab-cl" class="tab-content">
+            <div class="card">
+                <h2>🏆 Knuffel Champions League</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">
+                    De beste 2 teams uit jouw competitie nemen het op tegen 6 internationale topclubs!
+                </p>
+                <button class="btn btn-success" id="cl-start-btn" onclick="initChampionsLeague()" disabled>Start Champions League</button>
+                <div id="cl-bracket" style="margin-top: 12px;"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- NAVBAR -->
+    <nav>
+        <button class="active" onclick="switchTab('setup', this)">⚙️<br>Setup</button>
+        <button onclick="switchTab('stand', this)">📊<br>Stand</button>
+        <button onclick="switchTab('program', this)">📅<br>Programma</button>
+        <button onclick="switchTab('live', this)">⏱️<br>Live</button>
+        <button onclick="switchTab('results', this)">📋<br>Uitslagen</button>
+        <button onclick="switchTab('stats', this)">📈<br>Stats</button>
+        <button onclick="switchTab('players', this)">🧸<br>Spelers</button>
+        <button onclick="switchTab('transfers', this)">🔄<br>Transfers</button>
+        <button onclick="switchTab('newspaper', this)">📰<br>Krant</button>
+        <button onclick="switchTab('cl', this)">🏆<br>CL</button>
+    </nav>
+
+    <script>
+        let state = {
+            isStarted: false,
+            plushies: [],
+            teams: [],
+            schedule: [],
+            currentRound: 1,
+            standings: [],
+            simSpeed: 800,
+            isSimulating: false,
+            resultsHistory: []
+        };
+
+        // Grote pool van Team Namen waaruit random gekozen wordt
+        const ALL_TEAM_NAMES_POOL = [
+            "FC Pluche", "De Zachte Wolven", "VV Donzig", "Katoen United",
+            "Real Wollig", "SC Knuffel", "Sporting Stof", "Dynamo Pluis",
+            "Inter Pluche", "Bayer Fluffen", "Wollen Wandelaars", "AZ Zijdezacht",
+            "FC Fleece", "Zachte Zebra's", "Berenburg FC", "Vulling Vitesse"
+        ];
+
+        // Grote pool van internationale Champions League teams
+        const CL_TEAMS_POOL = [
+            "FC Plush Madrid", "Teddy Munich", "Paris Saint-Pluche",
+            "Katoen Juventus", "Donzig Barcelona", "Cuddly City",
+            "Fluffy Benfica", "Soft Sporting", "Borussia Beren",
+            "Pluche Porto", "Inter Wool", "Celtic Cotton"
+        ];
+
+        // Uitgebreide lijst met knuffelnamen
+        const LARGE_PLUSHIE_POOL = [
+            "Ollie Olifant", "Barnaby Beer", "Pluis Konijn", "Snabbel Eend", "Vlekje Hond",
+            "Tijger Tije", "Aapie Snuit", "Meneer Pinguïn", "Kareltje Kat", "Bram Bizon",
+            "Llama Lou", "Zebra Ziggy", "Kiki Krokodil", "Uil Uffie", "Vos Victor",
+            "Panda Puk", "Giraf Gijs", "Nijlpaard Niek", "Egel Eric", "Koala Kevin",
+            "Leeuw Leo", "Hamster Sjaak", "Marmot Max", "Walvis Wally", "Dolfijn Daan",
+            "Kameel Karel", "Stier Stef", "Geit Gino", "Schaap Sjors", "Eland Stef",
+            "Paard Pleun", "Eekhoorn Eef", "Baviaan Bram", "Vleermuis Victor", "Kangoeroe Koen",
+            "Wasbeer Wes", "Otter Otto", "Luiaard Lars", "Chinchilla Charlie", "Roodborstje Rob",
+            "Flamingo Flo", "Papegaai Paco", "Bever Ben", "Pelikaan Piet", "Dino Dirk"
+        ];
+
+        const POSITIONS = ["GK", "DEF", "MID", "ATT"];
+
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            if (btn) btn.classList.add('active');
+        }
+
+        function shuffleArray(array)
