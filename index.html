@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Knuffel Football League</title>
+    <title>Knuffel Football League Pro</title>
     <meta name="theme-color" content="#4f46e5">
     <style>
         :root {
@@ -171,6 +171,15 @@
             font-weight: 700;
         }
 
+        .badge-rating {
+            background: #fef3c7;
+            color: #b45309;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 0.7rem;
+        }
+
         .badge-pos {
             background: #f1f5f9;
             color: #334155;
@@ -178,6 +187,29 @@
             padding: 2px 5px;
             border-radius: 4px;
             font-weight: 700;
+        }
+
+        .team-logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.6);
+            margin-right: 6px;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+
+        .team-cell {
+            display: flex;
+            align-items: center;
         }
 
         .match-card {
@@ -199,6 +231,7 @@
             font-weight: 700;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             font-size: 0.85rem;
         }
 
@@ -259,6 +292,8 @@
             margin-bottom: 4px;
             border-bottom: 1px solid var(--border);
             padding-bottom: 2px;
+            display: flex;
+            align-items: center;
         }
 
         .newspaper-card {
@@ -303,12 +338,79 @@
             align-items: center;
             gap: 4px;
         }
+
+        .transfer-anim-box {
+            background: #0f172a;
+            color: white;
+            padding: 16px;
+            border-radius: 10px;
+            text-align: center;
+            margin-top: 10px;
+            border: 2px solid var(--primary);
+        }
+
+        .transfer-timer {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #f59e0b;
+        }
+
+        .totw-box {
+            background: #0f172a;
+            color: white;
+            border: 2px solid #f59e0b;
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+
+        .totw-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .totw-player {
+            background: #1e293b;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            border: 1px solid #334155;
+        }
+
+        .champ-ceremony {
+            background: linear-gradient(135deg, #1e1b4b, #451a03);
+            border: 3px solid #f59e0b;
+            border-radius: 14px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            box-shadow: 0 0 25px rgba(245, 158, 11, 0.5);
+            margin-bottom: 14px;
+            animation: champPulse 2s infinite alternate;
+        }
+
+        @keyframes champPulse {
+            from { box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
+            to { box-shadow: 0 0 30px rgba(245, 158, 11, 0.9); }
+        }
+
+        .cl-grand-finale {
+            background: linear-gradient(135deg, #1e1b4b, #311042);
+            color: #fef08a;
+            border: 3px solid #eab308;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(234, 179, 8, 0.4);
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>🧸 Knuffel Football League</h1>
+        <h1>🧸 Knuffel Football League Pro</h1>
         <p id="league-status">Status: Voorbereiding (8 Teams)</p>
     </header>
 
@@ -344,7 +446,7 @@
                 <div id="draft-live-area" style="display: none;" class="draft-box">
                     <div id="draft-text">Loting starten...</div>
                 </div>
-                <button class="btn btn-success" id="start-draft-btn" type="button" onclick="startDraft()">🎲 Start Live Loting (2 sec per speler)</button>
+                <button class="btn btn-success" id="start-draft-btn" type="button" onclick="startDraft()">🎲 Start Live Loting</button>
                 
                 <div id="draft-teams-overview" class="draft-teams-grid" style="display: none;"></div>
             </div>
@@ -352,6 +454,8 @@
 
         <!-- TAB 2: STAND -->
         <div id="tab-stand" class="tab-content">
+            <div id="championship-ceremony-area"></div>
+            
             <div class="card">
                 <h2>Huidige Stand</h2>
                 <table>
@@ -360,6 +464,9 @@
                             <th>#</th>
                             <th>Team</th>
                             <th>G</th>
+                            <th>W</th>
+                            <th>G</th>
+                            <th>V</th>
                             <th>DV</th>
                             <th>DT</th>
                             <th>DS</th>
@@ -417,6 +524,16 @@
         <!-- TAB 6: STATS -->
         <div id="tab-stats" class="tab-content">
             <div class="card">
+                <h2>⭐ Hoogste Gemiddelde Cijfers</h2>
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Speler</th><th>Team</th><th>Gem. Cijfer</th></tr>
+                    </thead>
+                    <tbody id="topratings-body"></tbody>
+                </table>
+            </div>
+
+            <div class="card">
                 <h2>⚽ Topscorers</h2>
                 <table>
                     <thead>
@@ -458,8 +575,8 @@
                             <th>Pos</th>
                             <th>Speler</th>
                             <th>Rat.</th>
+                            <th>Cijfer</th>
                             <th>Prog.</th>
-                            <th>Verw. Prog.</th>
                             <th>G</th>
                             <th>A</th>
                             <th>🟨</th>
@@ -478,7 +595,14 @@
                 <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;" id="transfer-info">
                     Transfers zijn mogelijk in speelronde 7 en na speelronde 14.
                 </p>
-                <button class="btn btn-warning" id="transfer-btn" onclick="performTransfers()" disabled>🔄 Voer Transfers Uit</button>
+                <button class="btn btn-warning" id="transfer-btn" onclick="startTransferWindow()" disabled>🔄 Start Transfermarkt</button>
+                
+                <div id="transfer-animation-area" style="display:none;" class="transfer-anim-box">
+                    <div style="font-size:0.9rem; color:#94a3b8;">Lopende Transfer Oplossing...</div>
+                    <div id="transfer-countdown" class="transfer-timer">5</div>
+                    <div id="transfer-status-text" style="font-weight:bold; margin-top:6px;">Scouts onderhandelen...</div>
+                </div>
+
                 <div id="transfer-feed" style="margin-top: 12px;"></div>
             </div>
         </div>
@@ -488,7 +612,7 @@
             <div id="newspaper-container">
                 <div class="newspaper-card">
                     <div class="newspaper-title">📰 DE KNUFFELKRANT - Editie 0</div>
-                    <p style="font-size: 0.85rem;">Welkom bij het nieuwe seizoen! Zodra de draft afgerond is en de wedstrijden beginnen, lees je hier alle achterklap, tactische analyses en smeuïge anekdotes!</p>
+                    <p style="font-size: 0.85rem;">Welkom bij het nieuwe seizoen! Zodra de draft afgerond is en de wedstrijden beginnen, lees je hier alle achterklap, tactische analyses, het Team van de Week en smeuïge anekdotes!</p>
                 </div>
             </div>
         </div>
@@ -501,7 +625,7 @@
                     De beste 2 teams uit jouw competitie nemen het op tegen 6 internationale topclubs!
                 </p>
                 <button class="btn btn-success" id="cl-start-btn" onclick="initChampionsLeague()" disabled>Start Champions League</button>
-                <div id="cl-bracket" style="margin-top: 12px;"></div>
+                <div id="cl-stage-area" style="margin-top: 12px;"></div>
             </div>
         </div>
 
@@ -530,11 +654,18 @@
             currentRound: 1,
             standings: [],
             simSpeed: 800,
-            isSimulating: false
+            isSimulating: false,
+            clState: null
         };
 
         const POSITIONS = ["GK", "DEF", "MID", "ATT"];
         const POS_ORDER = { "GK": 1, "DEF": 2, "MID": 3, "ATT": 4 };
+
+        const COLOR_PAIRS = [
+            ["#ef4444", "#1e3a8a"], ["#10b981", "#064e3b"], ["#f59e0b", "#7c2d12"],
+            ["#8b5cf6", "#4c1d95"], ["#ec4899", "#831843"], ["#06b6d4", "#164e63"],
+            ["#84cc16", "#365314"], ["#6366f1", "#1e1b4b"]
+        ];
 
         const ALL_TEAM_NAMES = [
             "FC Pluche", "De Zachte Wolven", "VV Donzig", "Katoen United",
@@ -551,52 +682,42 @@
             "Leeuw Leo", "Hamster Sjaak", "Marmot Max", "Walvis Wally", "Dolfijn Daan",
             "Kameel Karel", "Stier Stef", "Geit Gino", "Schaap Sjors", "Eland Stef",
             "Paard Pleun", "Eekhoorn Eef", "Beertje Bram", "Kangoeroe Kiki", "Aapie Anton",
-            "Wasbeer Wes", "Krab Robbie", "Inktvis Otto", "Flamingo Flo", "Chinchilla Cees",
-            "Luiaard Lucas", "Bever Bob", "Mol Maarten", "Otter Oscar", "Pelikaan Piet",
-            "Stokstaart Stijn", "Cavia Casper", "Muis Mies", "Vleermuis Victor", "Walrus Wout"
+            "Wasbeer Wes", "Krab Robbie", "Inktvis Otto", "Flamingo Flo", "Chinchilla Cees"
         ];
 
         const CL_POOL_TEAMS = [
             "FC Plush Madrid", "Teddy Munich", "Paris Saint-Pluche", "Katoen Juventus", 
-            "Donzig Barcelona", "Cuddly City", "Borussia Fluffmund", "Inter Wollig", 
-            "Pluche AC", "Benfica Beertjes", "Sporting Stoffig", "Boca Juniors Pluche"
+            "Donzig Barcelona", "Cuddly City", "Borussia Fluffmund", "Inter Wollig"
         ];
 
-        const CL_POOL_PLAYERS = [
-            "Cristiano Teddy", "Lionel Muis", "Kylian Mbappluis", "Erling Haas", 
-            "Kevin De Bear", "Jude Bellingbeer", "Luka Modrichje", "Virgil van Dijker"
+        const KRANT_HEADLINES = [
+            "Tactische Masterclass ontregelt verdediging van {TEAM2}!",
+            "Verhitte strijd tussen {TEAM1} en {TEAM2} eindigt in spektakel!",
+            "Toeschouwers op de banken bij kraker tussen {TEAM1} en {TEAM2}!",
+            "Onvoorspelbare ontknoping zet verhoudingen op scherp bij {TEAM1}!",
+            "Medische staf van {TEAM1} overwerkt na fysieke veldslag tegen {TEAM2}!"
         ];
 
-        const ANECDOTES_POOL = [
-            { 
-                title: "Snoepautomaat Drama in de Rust", 
-                text: "werd vlak voor de aftrap betrapt bij de snoepautomaat in de kantine. Na het verorberen van drie zakjes gummibeertjes en een fristi speelde de knuffel de wedstrijd van z'n leven." 
-            },
-            { 
-                title: "Het Vermiste Geluks-Strikje", 
-                text: "weigerde aanvankelijk het veld te betreden omdat het vertrouwde rode geluks-strikje kwijt was in de wasmand. Pas toen de materiaalman een veters strikte als vervanging, stapte de speler het veld op." 
-            },
-            { 
-                title: "De Vlinder-Aantal-Incident", 
-                text: "vergat tijdens een cruciale tegenaanval de bal en besloot een zeldzame gele vlinder achteraan te rennen over de zijlijn." 
-            },
-            { 
-                title: "Acrobatische Jubel met Schade", 
-                text: "scoorde op fenomenale wijze en trakteerde het publiek op een drievoudige salto. Helaas liet een naadje op de rug los waardoor er wat vulling op het veld achterbleef." 
-            },
-            { 
-                title: "Tactische Nickerchen", 
-                text: "ging tijdens de rust op de massagetafel liggen voor een korte recuperatie en viel zo diep in slaap dat er koud water nodig was om de knuffel wakker te krijgen." 
-            }
+        const KRANT_ANECDOTES = [
+            "werd voor de aftrap gespot terwijl hij stiekem de tactische bespreking van de tegenstander zat af te luisteren vanuit een opbergkast.",
+            "ruilde in de rust spontaan van schoenen met de grensrechter wegens vermeende 'ongunstige wrijving'.",
+            "weigerde het veld op te komen zonder dat de mascotte eerst een drievoudige buiging voor hem maakte.",
+            "vergat de bal tijdens een cruciale aanval en begon gepassioneerd de pluisjes op de middencirkel te tellen.",
+            "fell tijdens de drinkpauze per ongeluk in slaap tegen de doelpaal aan en moest door de keeper wakker geschud worden.",
+            "eiste dat de wedstrijdbal eerst grondig geborsteld werd met speciale katoensampoo."
         ];
 
-        const EXTRA_NEWS_POOL = [
-            "Supporters van de thuisclub gooiden massaal donzige kussentjes op het veld uit protest tegen een vermeende overtreding op de keeper.",
-            "De mascotte van de bezoekers raakte tijdens de rust verstrikt in het voorzetnet en moest door de brandweer bevrijd worden.",
-            "Een verhit bestuurscconflict bij het uitteam zorgde voor vertraging; de voorzitter weigerde de kleedkamer op slot te doen.",
-            "De veldmeester klaagde na de wedstrijd over 'overmatige pluisvorming' in het strafschopgebied.",
-            "Een groep meegereisde fanatieke supporters zong 90 minuten lang ononderbroken clubliederen vanaf de tribune."
+        const KRANT_CLUB_STORIES = [
+            "Sfeeractie bij {TEAM1} geteisterd door plotselinge pluisregen op de tribune. De supporters van {TEAM2} konden er smakelijk om lachen.",
+            "Bestuurlijke spanningen lopen op: de voorzitter van {TEAM1} weigerde na afloop de hand te schudden van het bestuur van {TEAM2}.",
+            "Het veld bij {TEAM1} lag er opvallend hobbelig bij. Coach van {TEAM2} sprak na afloop schamper van 'een hobbelige konijnenberg'.",
+            "Supporters van {TEAM1} en {TEAM2} organiseerden voorafgaand aan de aftrap een gezamenlijke inzamelingsactie voor versleten vulling."
         ];
+
+        function getTeamLogoHTML(team) {
+            if (!team) return '';
+            return `<span class="team-logo" style="background: linear-gradient(135deg, ${team.color1}, ${team.color2});">${team.code}</span>`;
+        }
 
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -626,7 +747,10 @@
                         yellowCards: 0,
                         redCards: 0,
                         cleanSheets: 0,
-                        isSentOff: false
+                        matchRatings: [],
+                        lastMatchRating: 6.0,
+                        isSentOff: false,
+                        transferredInRound: -1
                     });
                 }
             });
@@ -658,7 +782,10 @@
                     yellowCards: 0,
                     redCards: 0,
                     cleanSheets: 0,
-                    isSentOff: false
+                    matchRatings: [],
+                    lastMatchRating: 6.0,
+                    isSentOff: false,
+                    transferredInRound: -1
                 });
             }
             renderSetupPlushies();
@@ -692,7 +819,7 @@
                 const teamPlayers = state.plushies.filter(p => p.teamId === team.id);
                 return `
                     <div class="draft-team-card">
-                        <h4>${team.name}</h4>
+                        <h4>${getTeamLogoHTML(team)} ${team.name}</h4>
                         ${POSITIONS.map(pos => {
                             const p = teamPlayers.find(x => x.position === pos);
                             return `<div><span class="badge-pos">${pos}</span>${p ? p.name : '<em>...</em>'}</div>`;
@@ -714,7 +841,19 @@
             document.getElementById('draft-live-area').style.display = 'block';
 
             let shuffledTeamNames = [...ALL_TEAM_NAMES].sort(() => 0.5 - Math.random()).slice(0, 8);
-            state.teams = shuffledTeamNames.map((name, idx) => ({ id: idx + 1, name: name }));
+            let colors = [...COLOR_PAIRS].sort(() => 0.5 - Math.random());
+
+            state.teams = shuffledTeamNames.map((name, idx) => {
+                const words = name.split(' ');
+                let code = words.length > 1 ? words[0][0] + words[1][0] : name.substring(0, 2);
+                return {
+                    id: idx + 1,
+                    name: name,
+                    code: code.toUpperCase(),
+                    color1: colors[idx][0],
+                    color2: colors[idx][1]
+                };
+            });
 
             let shuffled = [...state.plushies].sort(() => 0.5 - Math.random());
 
@@ -733,13 +872,13 @@
                     p.position = pos;
 
                     document.getElementById('draft-text').innerHTML = `
-                        🎲 <strong>${p.name}</strong> (Rating: ${p.rating}) ➔ <strong>${team.name}</strong> (<span class="badge-pos">${pos}</span>)
+                        🎲 <strong>${p.name}</strong> (Rating: ${p.rating}) ➔ ${getTeamLogoHTML(team)} <strong>${team.name}</strong> (<span class="badge-pos">${pos}</span>)
                     `;
 
                     renderDraftTeamsOverview();
 
                     idx++;
-                    setTimeout(draftTick, 2000);
+                    setTimeout(draftTick, 1500);
                 } else {
                     document.getElementById('draft-text').innerHTML = `🎉 <strong>Alle knuffels zijn verdeeld! Competitie gestart.</strong>`;
                     state.standings = state.teams.map(t => ({
@@ -788,8 +927,8 @@
                     const home = state.teams.find(t => t.id === m.home);
                     const away = state.teams.find(t => t.id === m.away);
                     return `
-                        <div style="display:flex; justify-content:space-between; font-size:0.8rem; padding:4px 0;">
-                            <span>${home.name} - ${away.name}</span>
+                        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; padding:4px 0;">
+                            <span class="team-cell">${getTeamLogoHTML(home)} ${home.name} vs ${getTeamLogoHTML(away)} ${away.name}</span>
                             <span><strong>${m.played ? m.homeScore + ' - ' + m.awayScore : 'vs'}</strong></span>
                         </div>
                     `;
@@ -806,13 +945,31 @@
 
         function setSpeed(ms) { state.simSpeed = ms; }
 
+        function calculateTeamStrength(teamId) {
+            const activePlayers = state.plushies.filter(p => p.teamId === teamId && !p.isSentOff);
+            if (activePlayers.length === 0) return 10;
+            const sumRating = activePlayers.reduce((acc, p) => acc + p.rating, 0);
+            return sumRating * (activePlayers.length / 4);
+        }
+
+        function getAvgRating(p) {
+            if (!p.matchRatings || p.matchRatings.length === 0) return '-';
+            const sum = p.matchRatings.reduce((a, b) => a + b, 0);
+            return (sum / p.matchRatings.length).toFixed(1);
+        }
+
         function startLiveRound() {
             if (state.isSimulating || state.currentRound > 14) return;
             state.isSimulating = true;
             document.getElementById('sim-btn').disabled = true;
             document.getElementById('live-container').style.display = 'block';
 
-            state.plushies.forEach(p => p.isSentOff = false);
+            state.plushies.forEach(p => {
+                p.isSentOff = false;
+                p.currentLiveRating = 6.0 + (p.rating - 60) * 0.02;
+                p.roundGoals = 0;
+                p.roundAssists = 0;
+            });
 
             let minute = 1;
             const matches = state.schedule[state.currentRound - 1];
@@ -829,20 +986,19 @@
                     const home = state.teams.find(t => t.id === m.home);
                     const away = state.teams.find(t => t.id === m.away);
                     
-                    // SORTEREN OP POSITIE (GK -> DEF -> MID -> ATT)
                     const homePlayers = state.plushies.filter(p => p.teamId === m.home)
                         .sort((a,b) => POS_ORDER[a.position] - POS_ORDER[b.position]);
                     const awayPlayers = state.plushies.filter(p => p.teamId === m.away)
                         .sort((a,b) => POS_ORDER[a.position] - POS_ORDER[b.position]);
 
-                    const recentEvents = m.events.slice(-3).reverse();
+                    const recentEvents = m.events.slice(-5).reverse();
 
                     return `
                         <div style="background:#1e293b; padding:12px; border-radius:8px; margin-top:10px; border:1px solid #334155;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; font-weight:bold; font-size:0.9rem;">
-                                <span style="color:#60a5fa;">${home.name}</span>
-                                <span style="font-size:1.3rem; color:#10b981; background:#0f172a; padding:2px 10px; border-radius:6px;">${m.homeScore} - ${m.awayScore}</span>
-                                <span style="color:#f472b6;">${away.name}</span>
+                            <div style="display:flex; justify-content:space-between; align-items:center; font-weight:bold; font-size:0.85rem;">
+                                <span class="team-cell" style="color:#60a5fa;">${getTeamLogoHTML(home)} ${home.name}</span>
+                                <span style="font-size:1.2rem; color:#10b981; background:#0f172a; padding:2px 10px; border-radius:6px;">${m.homeScore} - ${m.awayScore}</span>
+                                <span class="team-cell" style="color:#f472b6;">${getTeamLogoHTML(away)} ${away.name}</span>
                             </div>
                             
                             <div class="lineup-grid">
@@ -850,8 +1006,9 @@
                                     <strong style="color:#94a3b8; font-size:0.75rem;">Opst. ${home.name}:</strong>
                                     <ul>
                                         ${homePlayers.map(p => `
-                                            <li style="${p.isSentOff ? 'text-decoration:line-through; opacity:0.5;' : ''}">
-                                                <span class="badge-pos">${p.position}</span>${p.name}
+                                            <li style="${p.isSentOff ? 'text-decoration:line-through; opacity:0.4;' : ''}">
+                                                <span class="badge-pos">${p.position}</span> ${p.name} 
+                                                <span class="badge-rating">${p.currentLiveRating.toFixed(1)}</span>
                                             </li>
                                         `).join('')}
                                     </ul>
@@ -860,7 +1017,8 @@
                                     <strong style="color:#94a3b8; font-size:0.75rem;">Opst. ${away.name}:</strong>
                                     <ul>
                                         ${awayPlayers.map(p => `
-                                            <li style="justify-content:flex-end; ${p.isSentOff ? 'text-decoration:line-through; opacity:0.5;' : ''}">
+                                            <li style="justify-content:flex-end; ${p.isSentOff ? 'text-decoration:line-through; opacity:0.4;' : ''}">
+                                                <span class="badge-rating">${p.currentLiveRating.toFixed(1)}</span>
                                                 ${p.name} <span class="badge-pos">${p.position}</span>
                                             </li>
                                         `).join('')}
@@ -868,10 +1026,11 @@
                                 </div>
                             </div>
 
-                            <div style="font-size:0.75rem; background:#0f172a; padding:8px; border-radius:6px; min-height:45px;">
+                            <div style="font-size:0.75rem; background:#0f172a; padding:8px; border-radius:6px; min-height:65px;">
+                                <div style="font-size:0.68rem; color:#f59e0b; margin-bottom:4px; font-weight:bold;">LAATSTE 5 ACTIES:</div>
                                 ${recentEvents.length > 0 
-                                    ? recentEvents.map(e => `<div>${e.min}' ${e.icon}${e.text}</div>`).join('') 
-                                    : '<span style="color:#64748b;">Wedstrijd onderweg...</span>'}
+                                    ? recentEvents.map(e => `<div>${e.min}' ${e.icon} ${e.text}</div>`).join('') 
+                                    : '<span style="color:#64748b;">Wedstrijd op gang aan het komen...</span>'}
                             </div>
                         </div>
                     `;
@@ -880,52 +1039,96 @@
                 matches.forEach(m => {
                     const activeHomePlayers = state.plushies.filter(p => p.teamId === m.home && !p.isSentOff);
                     const activeAwayPlayers = state.plushies.filter(p => p.teamId === m.away && !p.isSentOff);
+                    
+                    const homeStrength = calculateTeamStrength(m.home);
+                    const awayStrength = calculateTeamStrength(m.away);
+                    const totalStrength = homeStrength + awayStrength;
+
                     const homeTeam = state.teams.find(t => t.id === m.home);
                     const awayTeam = state.teams.find(t => t.id === m.away);
 
-                    if (Math.random() < 0.09) {
-                        const isHome = Math.random() < 0.55;
-                        const activeList = isHome ? activeHomePlayers : activeAwayPlayers;
-                        
+                    if (Math.random() < 0.16) {
+                        const isHomeChance = Math.random() < (homeStrength / totalStrength);
+                        const activeList = isHomeChance ? activeHomePlayers : activeAwayPlayers;
+                        const opponentList = isHomeChance ? activeAwayPlayers : activeHomePlayers;
+                        const teamName = isHomeChance ? homeTeam.name : awayTeam.name;
+
                         if (activeList.length === 0) return;
 
-                        const attacker = activeList.find(p => p.position === 'ATT') || activeList[0];
-                        const assister = activeList.find(p => p.position === 'MID');
-                        const teamName = isHome ? homeTeam.name : awayTeam.name;
+                        let attacker;
+                        const randPos = Math.random();
+                        if (randPos < 0.55) attacker = activeList.find(p => p.position === 'ATT') || activeList[0];
+                        else if (randPos < 0.85) attacker = activeList.find(p => p.position === 'MID') || activeList[0];
+                        else attacker = activeList.find(p => p.position === 'DEF') || activeList[0];
 
-                        const roll = Math.random();
-                        if (roll < 0.30) {
-                            if (isHome) m.homeScore++; else m.awayScore++;
+                        let assisterList = activeList.filter(p => p.id !== attacker.id);
+                        let assister = assisterList.length > 0 ? assisterList[Math.floor(Math.random() * assisterList.length)] : null;
+
+                        const eventRoll = Math.random();
+
+                        if (eventRoll < 0.22) {
+                            if (isHomeChance) m.homeScore++; else m.awayScore++;
                             attacker.goals++;
-                            if (assister) assister.assists++;
+                            attacker.roundGoals++;
+                            attacker.currentLiveRating = Math.min(10.0, attacker.currentLiveRating + 1.2);
+                            
+                            if (assister) {
+                                assister.assists++;
+                                assister.roundAssists++;
+                                assister.currentLiveRating = Math.min(10.0, assister.currentLiveRating + 0.6);
+                            }
 
                             m.events.push({
                                 min: minute,
                                 icon: '⚽',
-                                text: `<strong>GOAL!</strong> ${attacker.name} (${teamName})`
+                                text: `<strong>GOAL!</strong> Prachtig afgerond door ${attacker.name} (${attacker.position}) (${teamName})!`
                             });
                         } 
-                        else if (roll < 0.65) {
+                        else if (eventRoll < 0.42) {
+                            attacker.currentLiveRating = Math.min(10.0, attacker.currentLiveRating + 0.2);
                             m.events.push({
                                 min: minute,
                                 icon: '🎯',
-                                text: `Grote kans voor ${attacker.name} (${teamName}), maar gemist!`
+                                text: `Grote kans voor ${attacker.name} (${teamName}), maar de bal scheert over!`
                             });
                         }
-                        else if (roll < 0.85) {
-                            const offender = activeList.find(p => p.position === 'DEF') || activeList[Math.floor(Math.random() * activeList.length)];
-                            let yellowCountInMatch = m.events.filter(e => e.playerId === offender.id && e.icon === '🟨').length;
+                        else if (eventRoll < 0.62) {
+                            const mid = activeList.find(p => p.position === 'MID') || activeList[0];
+                            mid.currentLiveRating = Math.min(10.0, mid.currentLiveRating + 0.3);
+                            m.events.push({
+                                min: minute,
+                                icon: '⚡',
+                                text: `Prachtige aanval opgebouwd door ${mid.name} (${teamName}) met een slimme steekpas!`
+                            });
+                        }
+                        else if (eventRoll < 0.75) {
+                            const oppKeeper = opponentList.find(p => p.position === 'GK');
+                            if (oppKeeper) {
+                                oppKeeper.currentLiveRating = Math.min(10.0, oppKeeper.currentLiveRating + 0.4);
+                                m.events.push({
+                                    min: minute,
+                                    icon: '🧤',
+                                    text: `Geweldige redding van keeper ${oppKeeper.name} op een inzet van ${attacker.name}!`
+                                });
+                            }
+                        }
+                        else if (eventRoll < 0.90) {
+                            const offender = activeList[Math.floor(Math.random() * activeList.length)];
+                            let yellowCount = m.events.filter(e => e.playerId === offender.id && e.icon === '🟨').length;
 
-                            if (yellowCountInMatch === 1) {
+                            offender.currentLiveRating = Math.max(1.0, offender.currentLiveRating - 1.0);
+
+                            if (yellowCount === 1) {
                                 offender.yellowCards++;
                                 offender.redCards++;
                                 offender.isSentOff = true;
+                                offender.currentLiveRating = Math.max(1.0, offender.currentLiveRating - 2.0);
 
                                 m.events.push({
                                     min: minute,
                                     icon: '🟥',
                                     playerId: offender.id,
-                                    text: `<strong>2e GELE KAART = ROOD!</strong> ${offender.name} (${teamName}) moet het veld verlaten!`
+                                    text: `<strong>2e GELE KAART = ROOD!</strong> ${offender.name} (${offender.position}) moet vertrekken!`
                                 });
                             } else {
                                 offender.yellowCards++;
@@ -933,9 +1136,22 @@
                                     min: minute,
                                     icon: '🟨',
                                     playerId: offender.id,
-                                    text: `Gele kaart voor ${offender.name} (${teamName})`
+                                    text: `Gele kaart voor ${offender.name} (${offender.position}) (${teamName})`
                                 });
                             }
+                        }
+                        else {
+                            const offender = activeList[Math.floor(Math.random() * activeList.length)];
+                            offender.redCards++;
+                            offender.isSentOff = true;
+                            offender.currentLiveRating = Math.max(1.0, offender.currentLiveRating - 3.0);
+
+                            m.events.push({
+                                min: minute,
+                                icon: '🟥',
+                                playerId: offender.id,
+                                text: `<strong>DIRECT ROOD!</strong> Zware overtreding van ${offender.name} (${offender.position}) (${teamName})!`
+                            });
                         }
                     }
                 });
@@ -961,11 +1177,17 @@
 
                 if (m.awayScore === 0) {
                     const keeper = state.plushies.find(p => p.teamId === m.home && p.position === 'GK');
-                    if (keeper) keeper.cleanSheets++;
+                    if (keeper) {
+                        keeper.cleanSheets++;
+                        keeper.currentLiveRating = Math.min(10.0, keeper.currentLiveRating + 1.0);
+                    }
                 }
                 if (m.homeScore === 0) {
                     const keeper = state.plushies.find(p => p.teamId === m.away && p.position === 'GK');
-                    if (keeper) keeper.cleanSheets++;
+                    if (keeper) {
+                        keeper.cleanSheets++;
+                        keeper.currentLiveRating = Math.min(10.0, keeper.currentLiveRating + 1.0);
+                    }
                 }
 
                 updateStanding(m.home, m.homeScore, m.awayScore);
@@ -973,6 +1195,10 @@
             });
 
             state.plushies.forEach(p => {
+                let finalScore = parseFloat(p.currentLiveRating.toFixed(1));
+                p.matchRatings.push(finalScore);
+                p.lastMatchRating = finalScore;
+
                 if (p.rating < p.potential && Math.random() < 0.4) {
                     p.rating += 1;
                 }
@@ -992,10 +1218,10 @@
                 document.getElementById('sim-btn').disabled = true;
                 document.getElementById('sim-btn').innerText = "Seizoen Afgelopen";
 
+                renderChampionshipCeremony();
                 electPlayerOfTheSeason();
             }
 
-            // OPHOGEN RONDE EN DIRECT FILTER/RESULTS UPDATEN
             const completedRound = state.currentRound;
             state.currentRound++;
             
@@ -1007,6 +1233,33 @@
             renderStats();
             renderTeamPlayers();
             renderAllRounds();
+        }
+
+        function renderChampionshipCeremony() {
+            let sorted = [...state.standings].sort((a,b) => b.points - a.points || (b.goalsFor - b.goalsAgainst) - (a.goalsFor - a.goalsAgainst));
+            const champion = state.teams.find(t => t.id === sorted[0].teamId);
+            const runnerUp = state.teams.find(t => t.id === sorted[1].teamId);
+            const third = state.teams.find(t => t.id === sorted[2].teamId);
+
+            const ceremonyHTML = `
+                <div class="champ-ceremony">
+                    <div style="font-size:2.5rem;">🎆 👑 🎆</div>
+                    <h1 style="color:#fef08a; font-size:1.6rem; text-transform:uppercase;">OFFICIEEL LANDSKAMPIOEN</h1>
+                    <div style="font-size:2rem; font-weight:800; margin:10px 0;">
+                        ${getTeamLogoHTML(champion)} ${champion.name}
+                    </div>
+                    <p style="font-size:0.9rem; color:#fef3c7; margin-bottom:15px;">
+                        Gefeliciteerd! Met ${sorted[0].points} punten pakken zij de felbegeerde gouden knuffeltrofee!
+                    </p>
+                    <div style="display:flex; justify-content:center; gap:10px; font-size:0.8rem; border-top:1px dashed #f59e0b; padding-top:10px;">
+                        <div>🥇 1e: <strong>${champion.name}</strong></div>
+                        <div>🥈 2e: <strong>${runnerUp.name}</strong></div>
+                        <div>🥉 3e: <strong>${third.name}</strong></div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('championship-ceremony-area').innerHTML = ceremonyHTML;
         }
 
         function setupResultsRoundFilter() {
@@ -1049,8 +1302,8 @@
                 roundHTML += `
                     <div class="match-card">
                         <div class="match-header">
-                            <span>${home.name} - ${away.name}</span>
-                            <span style="color:var(--primary);">${m.homeScore} - ${m.awayScore}</span>
+                            <span class="team-cell">${getTeamLogoHTML(home)} ${home.name} - ${getTeamLogoHTML(away)} ${away.name}</span>
+                            <span style="color:var(--primary); font-weight:bold;">${m.homeScore} - ${m.awayScore}</span>
                         </div>
                         <div style="margin-top:6px;">${timelineHTML}</div>
                     </div>
@@ -1075,8 +1328,11 @@
                 return `
                     <tr>
                         <td>${idx + 1}</td>
-                        <td><strong>${team.name}</strong></td>
+                        <td class="team-cell">${getTeamLogoHTML(team)} <strong>${team.name}</strong></td>
                         <td>${s.played}</td>
+                        <td>${s.won}</td>
+                        <td>${s.drawn}</td>
+                        <td>${s.lost}</td>
                         <td>${s.goalsFor}</td>
                         <td>${s.goalsAgainst}</td>
                         <td>${s.goalsFor - s.goalsAgainst}</td>
@@ -1087,23 +1343,30 @@
         }
 
         function renderStats() {
+            let sortedRatings = [...state.plushies].filter(p => p.matchRatings.length > 0)
+                .sort((a,b) => parseFloat(getAvgRating(b)) - parseFloat(getAvgRating(a))).slice(0, 5);
+
+            document.getElementById('topratings-body').innerHTML = sortedRatings.map((p, idx) => {
+                const team = state.teams.find(t => t.id === p.teamId);
+                return `<tr><td>${idx+1}</td><td>${p.name} (${p.position})</td><td class="team-cell">${getTeamLogoHTML(team)} ${team ? team.name : '-'}</td><td><span class="badge-rating">⭐ ${getAvgRating(p)}</span></td></tr>`;
+            }).join('');
+
             let sortedGoals = [...state.plushies].sort((a,b) => b.goals - a.goals).slice(0, 5);
             document.getElementById('topscorers-body').innerHTML = sortedGoals.map((p, idx) => {
                 const team = state.teams.find(t => t.id === p.teamId);
-                return `<tr><td>${idx+1}</td><td>${p.name}</td><td>${team ? team.name : '-'}</td><td><strong>${p.goals}</strong></td></tr>`;
+                return `<tr><td>${idx+1}</td><td>${p.name} (${p.position})</td><td class="team-cell">${getTeamLogoHTML(team)} ${team ? team.name : '-'}</td><td><strong>${p.goals}</strong></td></tr>`;
             }).join('');
 
             let sortedAssists = [...state.plushies].sort((a,b) => b.assists - a.assists).slice(0, 5);
             document.getElementById('assists-body').innerHTML = sortedAssists.map((p, idx) => {
                 const team = state.teams.find(t => t.id === p.teamId);
-                return `<tr><td>${idx+1}</td><td>${p.name}</td><td>${team ? team.name : '-'}</td><td><strong>${p.assists}</strong></td></tr>`;
+                return `<tr><td>${idx+1}</td><td>${p.name} (${p.position})</td><td class="team-cell">${getTeamLogoHTML(team)} ${team ? team.name : '-'}</td><td><strong>${p.assists}</strong></td></tr>`;
             }).join('');
 
-            // TOP 5 KEEPERS MET CLEAN SHEETS
             let sortedCS = [...state.plushies].filter(p => p.position === 'GK').sort((a,b) => b.cleanSheets - a.cleanSheets).slice(0, 5);
             document.getElementById('cleansheets-body').innerHTML = sortedCS.map((p, idx) => {
                 const team = state.teams.find(t => t.id === p.teamId);
-                return `<tr><td>${idx+1}</td><td>${p.name}</td><td>${team ? team.name : '-'}</td><td><strong>${p.cleanSheets}</strong></td></tr>`;
+                return `<tr><td>${idx+1}</td><td>${p.name}</td><td class="team-cell">${getTeamLogoHTML(team)} ${team ? team.name : '-'}</td><td><strong>${p.cleanSheets}</strong></td></tr>`;
             }).join('');
         }
 
@@ -1116,20 +1379,19 @@
         function renderTeamPlayers() {
             const teamId = parseInt(document.getElementById('team-select-filter').value);
             
-            // SPELERS SORTEREN OP POSITIE (GK -> DEF -> MID -> ATT)
             const players = state.plushies.filter(p => p.teamId === teamId)
                 .sort((a,b) => POS_ORDER[a.position] - POS_ORDER[b.position]);
 
             document.getElementById('team-players-body').innerHTML = players.map(p => {
                 const prog = p.rating - p.startRating;
-                const expProg = p.potential - p.rating;
+                const avg = getAvgRating(p);
                 return `
                     <tr>
                         <td><span class="badge-pos">${p.position}</span></td>
                         <td><strong>${p.name}</strong></td>
                         <td>${p.rating}</td>
+                        <td><span class="badge-rating">⭐ ${avg}</span></td>
                         <td><span class="badge" style="background:#d1fae5; color:#065f46;">+${prog}</span></td>
-                        <td><span class="badge" style="background:#fef3c7; color:#92400e;">+${expProg} (Max ${p.potential})</span></td>
                         <td>${p.goals}</td>
                         <td>${p.assists}</td>
                         <td>${p.yellowCards}</td>
@@ -1140,36 +1402,68 @@
         }
 
         function generateNewspaper(matches) {
-            const randomPlayer = state.plushies[Math.floor(Math.random() * state.plushies.length)];
-            const randomAnecdoteObj = ANECDOTES_POOL[Math.floor(Math.random() * ANECDOTES_POOL.length)];
-            const extraNews = EXTRA_NEWS_POOL[Math.floor(Math.random() * EXTRA_NEWS_POOL.length)];
-            const team = state.teams.find(t => t.id === randomPlayer.teamId);
-
-            let matchOfTheRound = [...matches].sort((a,b) => (b.homeScore + b.awayScore) - (a.homeScore + a.awayScore))[0];
+            const matchOfTheRound = [...matches].sort((a,b) => (b.homeScore + b.awayScore) - (a.homeScore + a.awayScore))[0];
             const home = state.teams.find(t => t.id === matchOfTheRound.home);
             const away = state.teams.find(t => t.id === matchOfTheRound.away);
+
+            const randomHeadline = KRANT_HEADLINES[Math.floor(Math.random() * KRANT_HEADLINES.length)]
+                .replace('{TEAM1}', home.name).replace('{TEAM2}', away.name);
+
+            const randomPlayer = state.plushies[Math.floor(Math.random() * state.plushies.length)];
+            const playerTeam = state.teams.find(t => t.id === randomPlayer.teamId);
+            const randomAnecdote = KRANT_ANECDOTES[Math.floor(Math.random() * KRANT_ANECDOTES.length)];
+
+            const randomClubStory = KRANT_CLUB_STORIES[Math.floor(Math.random() * KRANT_CLUB_STORIES.length)]
+                .replace(/{TEAM1}/g, home.name).replace(/{TEAM2}/g, away.name);
+
+            // TEAM VAN DE WEEK BEREKENING (1 PER POSITIE)
+            let totw = POSITIONS.map(pos => {
+                let best = state.plushies.filter(p => p.position === pos)
+                    .sort((a,b) => b.lastMatchRating - a.lastMatchRating || b.roundGoals - a.roundGoals)[0];
+                return best;
+            });
+
+            const totwHTML = `
+                <div class="totw-box">
+                    <h3 style="color:#f59e0b; font-size:0.9rem; text-transform:uppercase;">🌟 Team van de Week (Ronde ${state.currentRound})</h3>
+                    <div class="totw-grid">
+                        ${totw.map(p => {
+                            const t = state.teams.find(x => x.id === p.teamId);
+                            return `
+                                <div class="totw-player">
+                                    <span class="badge-pos">${p.position}</span> <strong>${p.name}</strong><br>
+                                    <span class="team-cell" style="font-size:0.7rem; color:#94a3b8; margin-top:2px;">${getTeamLogoHTML(t)}${t ? t.name : ''}</span>
+                                    <div style="margin-top:4px; font-weight:bold; color:#10b981;">Cijfer: ⭐ ${p.lastMatchRating}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
 
             const container = document.getElementById('newspaper-container');
             container.innerHTML = `
                 <div class="newspaper-card">
                     <div class="newspaper-title">📰 DE KNUFFELKRANT - Editie ${state.currentRound}</div>
                     
-                    <h3 style="font-size:0.95rem; margin-top:6px; color:#1e293b;">🔥 Krantenkop: Spectakelstuk tussen ${home.name} en ${away.name}!</h3>
+                    <h3 style="font-size:0.95rem; margin-top:6px; color:#1e293b;">🔥 ${randomHeadline}</h3>
                     <p style="font-size:0.83rem; margin-top:4px; line-height:1.4;">
-                        Wat een wedstrijd! De supporters op de tribune gingen helemaal uit hun dak tijdens de ontmoeting tussen <strong>${home.name}</strong> en <strong>${away.name}</strong>. Met een uitslag van <strong>${matchOfTheRound.homeScore} - ${matchOfTheRound.awayScore}</strong> werd er volop gestreden voor elke meter katoen.
+                        Wat een strijd in de wedstrijd tussen <span class="team-cell">${getTeamLogoHTML(home)} <strong>${home.name}</strong></span> en <span class="team-cell">${getTeamLogoHTML(away)} <strong>${away.name}</strong></span>! De wedstrijd eindigde in <strong>${matchOfTheRound.homeScore} - ${matchOfTheRound.awayScore}</strong>.
                     </p>
 
+                    ${totwHTML}
+
                     <div style="background:#fefce8; border-left:3px solid #f59e0b; padding:8px; margin:10px 0; border-radius:4px;">
-                        <h4 style="font-size:0.85rem; color:#92400e;">🧸 Opvallend Incident: ${randomAnecdoteObj.title}</h4>
+                        <h4 style="font-size:0.85rem; color:#92400e;">🧸 Opvallende Anekdote op het Veld</h4>
                         <p style="font-size:0.8rem; color:#451a03; margin-top:3px;">
-                            Speler <strong>${randomPlayer.name}</strong> van <strong>${team.name}</strong> ${randomAnecdoteObj.text}
+                            Speler <strong>${randomPlayer.name}</strong> van <span class="team-cell">${getTeamLogoHTML(playerTeam)} ${playerTeam.name}</span> ${randomAnecdote}
                         </p>
                     </div>
 
                     <div style="background:#f1f5f9; border-left:3px solid #64748b; padding:8px; margin:10px 0; border-radius:4px;">
-                        <h4 style="font-size:0.85rem; color:#334155;">📣 Tribune & Achterklap:</h4>
+                        <h4 style="font-size:0.85rem; color:#334155;">📣 Achterklap & Derby Sfeer</h4>
                         <p style="font-size:0.8rem; color:#1e293b; margin-top:3px;">
-                            ${extraNews}
+                            ${randomClubStory}
                         </p>
                     </div>
 
@@ -1179,7 +1473,7 @@
         }
 
         function electPlayerOfTheSeason() {
-            let bestPlayer = [...state.plushies].sort((a,b) => (b.goals * 2 + b.assists + b.rating) - (a.goals * 2 + a.assists + a.rating))[0];
+            let bestPlayer = [...state.plushies].sort((a,b) => (b.goals * 2 + b.assists + parseFloat(getAvgRating(b))) - (a.goals * 2 + a.assists + parseFloat(getAvgRating(a))))[0];
             const team = state.teams.find(t => t.id === bestPlayer.teamId);
 
             const container = document.getElementById('newspaper-container');
@@ -1187,37 +1481,82 @@
                 <div class="card" style="background:#fef3c7; border:2px solid #f59e0b; text-align:center;">
                     <h2>🏆 SPELER VAN HET SEIZOEN</h2>
                     <p style="font-size:1.2rem; font-weight:bold; margin:8px 0;">🎉 ${bestPlayer.name} 🎉</p>
-                    <p style="font-size:0.85rem;">Team: <strong>${team.name}</strong> | Goals: <strong>${bestPlayer.goals}</strong> | Rating: <strong>${bestPlayer.rating}</strong></p>
+                    <p style="font-size:0.85rem;">Team: ${getTeamLogoHTML(team)} <strong>${team.name}</strong> | Goals: <strong>${bestPlayer.goals}</strong> | Gem. Cijfer: <strong>⭐ ${getAvgRating(bestPlayer)}</strong></p>
                 </div>
             ` + container.innerHTML;
         }
 
-        function performTransfers() {
-            const feed = document.getElementById('transfer-feed');
-            feed.innerHTML = "<h4>Transfernieuws:</h4>";
+        function startTransferWindow() {
+            document.getElementById('transfer-btn').disabled = true;
+            document.getElementById('transfer-animation-area').style.display = 'block';
 
-            for (let i = 0; i < 2; i++) {
-                let p1 = state.plushies[Math.floor(Math.random() * state.plushies.length)];
-                let p2 = state.plushies.find(p => p.position === p1.position && p.teamId !== p1.teamId);
+            const numTransfers = Math.floor(Math.random() * 3) + 4;
+            let transferQueue = [];
 
-                if (p1 && p2) {
-                    let t1 = state.teams.find(t => t.id === p1.teamId);
-                    let t2 = state.teams.find(t => t.id === p2.teamId);
+            for (let i = 0; i < numTransfers; i++) {
+                let availablePlayers = state.plushies.filter(p => p.transferredInRound !== state.currentRound);
+                if (availablePlayers.length < 2) break;
 
-                    let temp = p1.teamId;
-                    p1.teamId = p2.teamId;
-                    p2.teamId = temp;
+                let p1 = availablePlayers[Math.floor(Math.random() * availablePlayers.length)];
+                let possibleP2 = state.plushies.filter(p => 
+                    p.position === p1.position && 
+                    p.teamId !== p1.teamId && 
+                    p.transferredInRound !== state.currentRound
+                );
 
-                    feed.innerHTML += `
-                        <div style="background:#e0e7ff; padding:8px; border-radius:6px; margin-top:6px; font-size:0.8rem;">
-                            🔄 <strong>RUILTRANSFER (${p1.position}):</strong> <strong>${p1.name}</strong> ➔ ${t2.name} | <strong>${p2.name}</strong> ➔ ${t1.name}!
-                        </div>
-                    `;
+                if (possibleP2.length > 0) {
+                    let p2 = possibleP2[Math.floor(Math.random() * possibleP2.length)];
+                    
+                    p1.transferredInRound = state.currentRound;
+                    p2.transferredInRound = state.currentRound;
+
+                    transferQueue.push({ p1: p1, p2: p2 });
                 }
             }
 
-            document.getElementById('transfer-btn').disabled = true;
-            renderTeamPlayers();
+            let transferIndex = 0;
+
+            function processNextTransfer() {
+                if (transferIndex < transferQueue.length) {
+                    let count = 5;
+                    document.getElementById('transfer-countdown').innerText = count;
+                    document.getElementById('transfer-status-text').innerText = `Onderhandeling ${transferIndex + 1} van ${transferQueue.length}...`;
+
+                    let timer = setInterval(() => {
+                        count--;
+                        document.getElementById('transfer-countdown').innerText = count;
+
+                        if (count <= 0) {
+                            clearInterval(timer);
+
+                            let item = transferQueue[transferIndex];
+                            let t1 = state.teams.find(t => t.id === item.p1.teamId);
+                            let t2 = state.teams.find(t => t.id === item.p2.teamId);
+
+                            let temp = item.p1.teamId;
+                            item.p1.teamId = item.p2.teamId;
+                            item.p2.teamId = temp;
+
+                            const feed = document.getElementById('transfer-feed');
+                            feed.innerHTML = `
+                                <div style="background:#e0e7ff; padding:10px; border-radius:8px; margin-top:8px; font-size:0.8rem; border-left:4px solid var(--primary);">
+                                    🔄 <strong>TRANSFER COMPLEET (${item.p1.position}):</strong><br>
+                                    <strong>${item.p1.name}</strong> ➔ ${getTeamLogoHTML(t2)} ${t2.name}<br>
+                                    <strong>${item.p2.name}</strong> ➔ ${getTeamLogoHTML(t1)} ${t1.name}
+                                </div>
+                            ` + feed.innerHTML;
+
+                            transferIndex++;
+                            processNextTransfer();
+                        }
+                    }, 1000);
+                } else {
+                    document.getElementById('transfer-animation-area').style.display = 'none';
+                    renderTeamPlayers();
+                }
+            }
+
+            processNextTransfer();
         }
 
         function initChampionsLeague() {
@@ -1227,35 +1566,111 @@
             let shuffledIntTeams = [...CL_POOL_TEAMS].sort(() => 0.5 - Math.random()).slice(0, 6);
 
             const clTeams = [
-                top2[0].name, top2[1].name, ...shuffledIntTeams
-            ];
+                { name: top2[0].name, isUser: true },
+                { name: top2[1].name, isUser: true },
+                ...shuffledIntTeams.map(n => ({ name: n, isUser: false }))
+            ].sort(() => 0.5 - Math.random());
 
-            const bracket = document.getElementById('cl-bracket');
-            bracket.innerHTML = `
-                <h3>Knock-out Kwartfinales:</h3>
-                <ul style="font-size:0.85rem; padding-left:18px; margin-bottom:10px;">
-                    <li>${clTeams[0]} vs ${clTeams[7]}</li>
-                    <li>${clTeams[1]} vs ${clTeams[6]}</li>
-                    <li>${clTeams[2]} vs ${clTeams[5]}</li>
-                    <li>${clTeams[3]} vs ${clTeams[4]}</li>
-                </ul>
-                <button class="btn btn-success" onclick="simCLTournament('${clTeams[0]}', '${clTeams[1]}')">🏆 Speel Champions League Toernooi</button>
-                <div id="cl-results-box" style="margin-top:10px;"></div>
-            `;
+            state.clState = {
+                stage: 'QF',
+                qf: [
+                    { t1: clTeams[0], t2: clTeams[1], s1: 0, s2: 0, done: false },
+                    { t1: clTeams[2], t2: clTeams[3], s1: 0, s2: 0, done: false },
+                    { t1: clTeams[4], t2: clTeams[5], s1: 0, s2: 0, done: false },
+                    { t1: clTeams[6], t2: clTeams[7], s1: 0, s2: 0, done: false }
+                ],
+                sf: [],
+                finalMatch: null
+            };
+
+            renderCLStage();
         }
 
-        function simCLTournament(team1, team2) {
-            let randomStar = CL_POOL_PLAYERS[Math.floor(Math.random() * CL_POOL_PLAYERS.length)];
-            const box = document.getElementById('cl-results-box');
-            box.innerHTML = `
-                <div class="match-card"><strong>Halve Finale:</strong> ${team1} 3 - 1 FC Plush Madrid (Goal door: ${randomStar})</div>
-                <div class="match-card"><strong>Halve Finale:</strong> ${team2} 2 - 3 Teddy Munich</div>
-                <div class="card" style="background:#fef3c7; border:2px solid #f59e0b; text-align:center;">
-                    <h3>🏆 FINALE UITSLAG</h3>
-                    <p style="font-size:1.1rem; font-weight:bold; margin:6px 0;">${team1} 2 - 1 Teddy Munich</p>
-                    <p>🎉 <strong>${team1} IS KAMPIOEN VAN EUROPA!</strong> 🎉</p>
-                </div>
-            `;
+        function renderCLStage() {
+            const area = document.getElementById('cl-stage-area');
+            const cl = state.clState;
+
+            if (cl.stage === 'QF') {
+                area.innerHTML = `
+                    <h3>🥊 Kwartfinales Champions League</h3>
+                    ${cl.qf.map(m => `
+                        <div class="match-card">
+                            ${m.t1.name} vs ${m.t2.name}${m.done ? `<strong>(${m.s1} - ${m.s2})</strong>` : ''}
+                        </div>
+                    `).join('')}
+                    <button class="btn btn-success" onclick="simCLQuarterFinals()">⚽ Simuleer Kwartfinales</button>
+                `;
+            } else if (cl.stage === 'SF') {
+                area.innerHTML = `
+                    <h3>🔥 Halve Finales Champions League</h3>
+                    ${cl.sf.map(m => `
+                        <div class="match-card">
+                            ${m.t1.name} vs ${m.t2.name}${m.done ? `<strong>(${m.s1} - ${m.s2})</strong>` : ''}
+                        </div>
+                    `).join('')}
+                    <button class="btn btn-success" onclick="simCLSemiFinals()">⚽ Simuleer Halve Finales</button>
+                `;
+            } else if (cl.stage === 'FINAL') {
+                area.innerHTML = `
+                    <h3>👑 DE GROOTE FINALE</h3>
+                    <div class="match-card" style="border:2px solid #f59e0b; background:#fffbeb;">
+                        <strong>${cl.finalMatch.t1.name}</strong> vs <strong>${cl.finalMatch.t2.name}</strong>
+                    </div>
+                    <button class="btn btn-warning" onclick="simCLFinal()">🏆 SPEEL GROOTE FINALE</button>
+                `;
+            } else if (cl.stage === 'FINISHED') {
+                const winner = cl.finalMatch.s1 > cl.finalMatch.s2 ? cl.finalMatch.t1 : cl.finalMatch.t2;
+                area.innerHTML = `
+                    <div class="cl-grand-finale">
+                        <div style="font-size:2.5rem;">🎆 🏆 🎆</div>
+                        <h2 style="color:#fef08a; font-size:1.5rem; margin:10px 0;">EUROPEES KAMPIOEN!</h2>
+                        <h1 style="font-size:2rem; text-transform:uppercase; color:#ffffff; margin-bottom:10px;">${winner.name}</h1>
+                        <p style="font-size:0.9rem; color:#fef08a;">Uitslag Finale: ${cl.finalMatch.t1.name} ${cl.finalMatch.s1} - ${cl.finalMatch.s2} ${cl.finalMatch.t2.name}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function simCLQuarterFinals() {
+            state.clState.qf.forEach(m => {
+                m.s1 = Math.floor(Math.random() * 4);
+                m.s2 = Math.floor(Math.random() * 4);
+                if (m.s1 === m.s2) m.s1 += 1;
+                m.done = true;
+            });
+
+            const winners = state.clState.qf.map(m => m.s1 > m.s2 ? m.t1 : m.t2);
+            state.clState.sf = [
+                { t1: winners[0], t2: winners[1], s1: 0, s2: 0, done: false },
+                { t1: winners[2], t2: winners[3], s1: 0, s2: 0, done: false }
+            ];
+            state.clState.stage = 'SF';
+            renderCLStage();
+        }
+
+        function simCLSemiFinals() {
+            state.clState.sf.forEach(m => {
+                m.s1 = Math.floor(Math.random() * 4);
+                m.s2 = Math.floor(Math.random() * 4);
+                if (m.s1 === m.s2) m.s1 += 1;
+                m.done = true;
+            });
+
+            const winners = state.clState.sf.map(m => m.s1 > m.s2 ? m.t1 : m.t2);
+            state.clState.finalMatch = { t1: winners[0], t2: winners[1], s1: 0, s2: 0, done: false };
+            state.clState.stage = 'FINAL';
+            renderCLStage();
+        }
+
+        function simCLFinal() {
+            let fm = state.clState.finalMatch;
+            fm.s1 = Math.floor(Math.random() * 3) + 1;
+            fm.s2 = Math.floor(Math.random() * 3);
+            if (fm.s1 === fm.s2) fm.s1 += 1;
+            fm.done = true;
+
+            state.clState.stage = 'FINISHED';
+            renderCLStage();
         }
     </script>
 </body>
