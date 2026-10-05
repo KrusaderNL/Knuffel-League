@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Knuffel Voetbal League</title>
     <meta name="theme-color" content="#4f46e5">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <style>
         :root {
             --primary: #4f46e5;
@@ -143,6 +141,7 @@
             border: none;
             border-radius: 6px;
             cursor: pointer;
+            padding: 4px 8px;
         }
 
         input[type="text"] {
@@ -278,18 +277,18 @@
             <div class="card">
                 <h2>1. Knuffels Invoeren</h2>
                 <div id="edit-lock-msg" style="display: none;" class="locked-notice">
-                    🔒 De competitie is gestart! Je kunt de namen van de knuffels niet meer aanpassen.
+                    🔒 De competitie is gestart! Je kunt geen knuffels meer toevoegen.
                 </div>
                 
                 <div id="setup-form">
                     <input type="text" id="plushie-name" placeholder="Naam van je knuffel (bijv. Fluffie)">
-                    <button class="btn" id="add-btn">++ Voeg Knuffel Toe</button>
-                    <p style="font-size: 0.75rem; color: #6b7280; margin-top: 4px;">* Rating (60-80) wordt automatisch gegenereerd!</p>
+                    <button class="btn" type="button" onclick="addPlushie()">+ Voeg Knuffel Toe</button>
+                    <p style="font-size: 0.75rem; color: #6b7280; margin-top: 6px;">✨ Rating (tussen 60 en 80) wordt automatisch berekend!</p>
                 </div>
 
                 <div style="margin-top: 15px;">
                     <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 8px;">
-                        Mijn Knuffels (<span id="plushie-count">0</span> / minimaal 16 nodig voor 8 teams):
+                        Mijn Knuffels (<span id="plushie-count">0</span> / minimaal 16 nodig):
                     </p>
                     <div class="plushie-list" id="plushie-list-container"></div>
                 </div>
@@ -298,9 +297,9 @@
             <div class="card" id="start-league-card">
                 <h2>2. Start Competitie</h2>
                 <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 12px;">
-                    Er worden automatisch **8 teams** gevormd. De knuffels worden willekeurig verdeeld met commentaar!
+                    Er worden automatisch 8 teams gevormd en verdeeld met commentaar!
                 </p>
-                <button class="btn btn-success" id="start-btn">🚀 Genereer 8 Teams & Start</button>
+                <button class="btn btn-success" type="button" onclick="startLeague()">🚀 Genereer 8 Teams & Start</button>
             </div>
 
             <div class="card" id="team-assignment-card" style="display: none;">
@@ -313,7 +312,7 @@
         <div id="tab-league" class="tab-content">
             <div class="card">
                 <h2>Speelronde <span id="current-round">1</span> / <span id="total-rounds">14</span></h2>
-                <button class="btn btn-success" id="sim-btn">⚽ Simuleer Alle Wedstrijden</button>
+                <button class="btn btn-success" type="button" id="sim-btn" onclick="simulateRound()">⚽ Simuleer Alle Wedstrijden</button>
             </div>
 
             <div class="card" id="round-results" style="display: none;">
@@ -363,7 +362,7 @@
                 <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 12px;" id="transfer-status-text">
                     Transfers zijn mogelijk halverwege (speelronde 7) en aan het einde van het seizoen.
                 </p>
-                <button class="btn" id="transfer-btn" disabled>🔄 Voer Transfers Uit</button>
+                <button class="btn" type="button" id="transfer-btn" onclick="triggerTransfers()" disabled>🔄 Voer Transfers Uit</button>
                 <div id="transfer-log" style="margin-top: 15px;"></div>
             </div>
         </div>
@@ -375,7 +374,7 @@
                 <p style="font-size: 0.85rem; color: #6b7280; margin-bottom: 12px;">
                     De beste 2 teams uit jouw competitie nemen het op tegen internationale topknuffels!
                 </p>
-                <button class="btn btn-success" id="cl-start-btn" disabled>Start Champions League</button>
+                <button class="btn btn-success" type="button" id="cl-start-btn" onclick="startChampionsLeague()" disabled>Start Champions League</button>
                 <div id="cl-container" style="margin-top: 15px;"></div>
             </div>
         </div>
@@ -405,7 +404,6 @@
     </nav>
 
     <script>
-        // App State
         let state = {
             isStarted: false,
             plushies: [
@@ -442,21 +440,14 @@
             "#8b5cf6", "#ec4899", "#14b8a6", "#6366f1"
         ];
 
-        // Event Listeners setup when DOM is ready
-        window.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('add-btn').addEventListener('click', addPlushie);
-            document.getElementById('start-btn').addEventListener('click', startLeague);
-            document.getElementById('sim-btn').addEventListener('click', simulateRound);
-            document.getElementById('transfer-btn').addEventListener('click', triggerTransfers);
-            document.getElementById('cl-start-btn').addEventListener('click', startChampionsLeague);
-
-            // Allow hitting Enter in the text field
-            document.getElementById('plushie-name').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') addPlushie();
-            });
-
+        window.onload = function() {
             renderPlushieList();
-        });
+            document.getElementById('plushie-name').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    addPlushie();
+                }
+            });
+        };
 
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -479,7 +470,7 @@
                         <span class="badge">Rating: ${p.rating}</span>
                     </div>
                     ${!state.isStarted ? `
-                        <button class="btn-danger btn-sm" onclick="removePlushie(${p.id})">✕</button>
+                        <button class="btn-danger" type="button" onclick="removePlushie(${p.id})">✕</button>
                     ` : ''}
                 `;
                 container.appendChild(div);
@@ -492,12 +483,12 @@
             const name = nameInput.value.trim();
 
             if (!name) {
-                alert('Voer a.u.b. een naam in voor de knuffel!');
+                alert('Voer a.u.b. eerst een naam in!');
                 return;
             }
 
             // Automatische rating tussen 60 en 80
-            const randomRating = Math.floor(Math.random() * 21) + 60; // 60 t/m 80
+            const randomRating = Math.floor(Math.random() * 21) + 60; 
             const randomPotential = Math.min(99, randomRating + Math.floor(Math.random() * 12) + 5);
 
             state.plushies.push({
@@ -520,7 +511,7 @@
 
         function startLeague() {
             if (state.plushies.length < 16) {
-                return alert('Voeg minimaal 16 knuffels toe voor 8 teams (minimaal 2 knuffels per team)!');
+                return alert('Voeg minimaal 16 knuffels toe voor 8 teams (minimaal 2 per team)!');
             }
 
             state.isStarted = true;
@@ -530,14 +521,12 @@
             document.getElementById('league-status').innerText = 'Status: Competitie Bezig (8 Teams)';
             renderPlushieList();
 
-            // Setup 8 Teams
             state.teams = TEAM_NAMES.map((name, idx) => ({
                 id: idx + 1,
                 name: name,
                 color: TEAM_COLORS[idx]
             }));
 
-            // Shuffle & Assign Plushies
             let shuffled = [...state.plushies].sort(() => 0.5 - Math.random());
             let commentaryHTML = "<h3>Indelingsverslag:</h3><ul style='font-size: 0.85rem; padding-left: 18px; margin-top: 8px;'>";
 
@@ -559,7 +548,6 @@
             document.getElementById('team-assignment-commentary').innerHTML = commentaryHTML;
             document.getElementById('team-assignment-card').style.display = 'block';
 
-            // Init Standings
             state.standings = state.teams.map(t => ({
                 teamId: t.id,
                 played: 0,
@@ -636,8 +624,7 @@
                     "haalt verwoestend uit van afstand!",
                     "maakt een schitterende panna op de tegenstander!",
                     "kopt de bal strak in de kruising!",
-                    "maakt een fantastische redding op de lijn!",
-                    "struikelt schattig over de bal maar behoudt balbezit."
+                    "maakt een fantastische redding op de lijn!"
                 ];
 
                 if (homePlushies.length > 0) {
@@ -672,7 +659,6 @@
 
             document.getElementById('round-results').style.display = 'block';
 
-            // Player Growth
             state.plushies.forEach(p => {
                 if (p.rating < p.potential && Math.random() > 0.6) {
                     p.rating += 1;
@@ -808,11 +794,9 @@
                     <li><strong>${foreignTeams[0].name}</strong> (Sterschutter: ${foreignTeams[0].star})</li>
                     <li><strong>${foreignTeams[1].name}</strong> (Sterschutter: ${foreignTeams[1].star})</li>
                 </ul>
-                <button class="btn btn-success" id="cl-semi-btn">⚽ Simuleer Halve Finales</button>
+                <button class="btn btn-success" type="button" onclick="simCLSemiFinals('${top2[0].name}', '${top2[1].name}')">⚽ Simuleer Halve Finales</button>
                 <div id="cl-results" style="margin-top: 15px;"></div>
             `;
-
-            document.getElementById('cl-semi-btn').onclick = () => simCLSemiFinals(top2[0].name, top2[1].name);
         }
 
         function simCLSemiFinals(team1, team2) {
@@ -826,10 +810,8 @@
                     <div class="match-header"><span>${team2} - Teddy Munich</span><span>1 - 3</span></div>
                     <div class="match-log">⚽ Sir Fluffington blijkt toch te sterk voor ${team2}.</div>
                 </div>
-                <button class="btn btn-success" id="cl-final-btn" style="margin-top:10px;">🏆 Speel Champions League Finale</button>
+                <button class="btn btn-success" type="button" onclick="simCLFinal('${team1}')" style="margin-top:10px;">🏆 Speel Champions League Finale</button>
             `;
-
-            document.getElementById('cl-final-btn').onclick = () => simCLFinal(team1);
         }
 
         function simCLFinal(finalist) {
