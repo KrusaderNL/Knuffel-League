@@ -40,7 +40,7 @@
         }
 
         header h1 {
-            font-size: 1.5rem;
+            font-size: 1.4rem;
             font-weight: 800;
             letter-spacing: -0.5px;
         }
@@ -63,21 +63,23 @@
             border-top: 1px solid var(--border);
             z-index: 1000;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
+            overflow-x: auto;
         }
 
         nav button {
             background: none;
             border: none;
             color: var(--text-muted);
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 2px;
             cursor: pointer;
-            flex: 1;
+            min-width: 50px;
             padding: 4px 0;
             font-weight: 500;
+            flex: 1;
         }
 
         nav button.active {
@@ -126,7 +128,7 @@
             gap: 6px;
         }
 
-        .btn:active { transform: scale(0.98); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .btn-success { background: var(--accent); }
         .btn-warning { background: #f59e0b; }
         .btn-secondary { background: #64748b; }
@@ -141,10 +143,6 @@
             margin-bottom: 8px;
             font-size: 0.9rem;
             outline: none;
-        }
-
-        input[type="text"]:focus, select:focus {
-            border-color: var(--primary);
         }
 
         .tab-content { display: none; }
@@ -171,7 +169,6 @@
             border-radius: 12px;
             font-size: 0.7rem;
             font-weight: 700;
-            display: inline-block;
         }
 
         .badge-pos {
@@ -182,8 +179,6 @@
             border-radius: 4px;
             font-weight: 700;
         }
-
-        .badge-green { background: #d1fae5; color: #065f46; }
 
         .match-card {
             border-left: 4px solid var(--primary);
@@ -207,12 +202,16 @@
             font-size: 0.85rem;
         }
 
-        .match-detail {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 6px;
-            line-height: 1.4;
+        .timeline-event {
+            font-size: 0.78rem;
+            padding: 3px 0;
+            border-bottom: 1px dashed var(--border);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
+
+        .timeline-event:last-child { border-bottom: none; }
 
         .live-banner {
             background: #0f172a;
@@ -229,19 +228,37 @@
             text-align: center;
         }
 
-        .live-score-grid {
+        .draft-box {
+            background: #f0fdf4;
+            border: 1px dashed var(--accent);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        .draft-teams-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
             gap: 8px;
             margin-top: 10px;
         }
 
-        .live-score-item {
-            background: #1e293b;
-            padding: 8px;
+        .draft-team-card {
+            background: white;
+            border: 1px solid var(--border);
             border-radius: 8px;
+            padding: 8px;
             font-size: 0.75rem;
-            text-align: center;
+        }
+
+        .draft-team-card h4 {
+            font-size: 0.8rem;
+            color: var(--primary-dark);
+            margin-bottom: 4px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 2px;
         }
 
         .newspaper-card {
@@ -260,16 +277,6 @@
             padding-bottom: 4px;
             margin-bottom: 8px;
         }
-
-        .draft-box {
-            background: #f0fdf4;
-            border: 1px dashed var(--accent);
-            padding: 12px;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: 600;
-            margin: 10px 0;
-        }
     </style>
 </head>
 <body>
@@ -287,7 +294,7 @@
                 <h2>1. Knuffels Invoeren</h2>
                 <div id="setup-form">
                     <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">
-                        Voeg losse knuffels toe of plak een lijst. Er zijn exact <strong>32 knuffels</strong> nodig (4 per team: GK, DEF, MID, ATT).
+                        Voeg knuffelnamen toe. Er zijn exact <strong>32 knuffels</strong> nodig (4 per team: GK, DEF, MID, ATT).
                     </p>
                     <textarea id="bulk-plushies" rows="3" placeholder="Plak hier je knuffelnamen, bijv:&#10;Fluffie Beer&#10;Snuffel Konijn&#10;Tijger Tije"></textarea>
                     <div style="display: flex; gap: 6px; margin-bottom: 10px;">
@@ -300,7 +307,9 @@
                     <p style="font-size: 0.85rem; font-weight: bold; margin-bottom: 6px;">
                         Geselecteerde Knuffels: <span id="plushie-count">0</span> / 32
                     </p>
-                    <div id="plushie-list-container" style="max-height: 180px; overflow-y: auto;"></div>
+                    <div id="plushie-list-container" style="max-height: 180px; overflow-y: auto;">
+                        <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 15px;">Nog geen knuffels toegevoegd.</p>
+                    </div>
                 </div>
             </div>
 
@@ -309,7 +318,9 @@
                 <div id="draft-live-area" style="display: none;" class="draft-box">
                     <div id="draft-text">Loting starten...</div>
                 </div>
-                <button class="btn btn-success" id="start-draft-btn" type="button" onclick="startDraft()">🎲 Start Live Loting & Vorm Teams</button>
+                <button class="btn btn-success" id="start-draft-btn" type="button" onclick="startDraft()">🎲 Start Live Loting (1 sec per speler)</button>
+                
+                <div id="draft-teams-overview" class="draft-teams-grid" style="display: none;"></div>
             </div>
         </div>
 
@@ -339,34 +350,41 @@
             <div id="all-rounds-container"></div>
         </div>
 
-        <!-- TAB 4: UITSLAGEN -->
-        <div id="tab-results" class="tab-content">
+        <!-- TAB 4: LIVE CENTER -->
+        <div id="tab-live" class="tab-content">
             <div class="card">
-                <h2>Wedstrijd Center Live</h2>
+                <h2>⏱️ Live Wedstrijd Center</h2>
                 
                 <div id="live-container" style="display: none;" class="live-banner">
                     <div class="live-timer">Minuut: <span id="live-minute">0</span>'</div>
                     
-                    <div class="live-score-grid" id="live-scores-grid"></div>
-
-                    <div style="display: flex; justify-content: center; gap: 5px; margin: 10px 0 6px 0;">
+                    <div style="display: flex; justify-content: center; gap: 5px; margin: 10px 0;">
                         <button class="btn btn-sm btn-secondary" onclick="setSpeed(800)">1x</button>
                         <button class="btn btn-sm btn-secondary" onclick="setSpeed(300)">2x</button>
-                        <button class="btn btn-sm btn-secondary" onclick="setSpeed(100)">5x</button>
-                        <button class="btn btn-sm btn-warning" onclick="setSpeed(20)">⚡ Snel</button>
+                        <button class="btn btn-sm btn-warning" onclick="setSpeed(50)">⚡ Snel</button>
                     </div>
-                    <div id="live-ticker" style="font-size: 0.8rem; background: #1e293b; padding: 8px; border-radius: 6px; text-align: center; font-style: italic;">
-                        Wedstrijden starten zo...
-                    </div>
+
+                    <div id="live-matches-detail-container"></div>
                 </div>
 
-                <button class="btn btn-success" id="sim-btn" onclick="startLiveRound()">⚽ Simuleer Speelronde Live</button>
-
-                <div id="results-history" style="margin-top: 15px;"></div>
+                <div id="live-idle-message">
+                    <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">Klik op de knop hieronder om de speelronde live te simuleren.</p>
+                    <button class="btn btn-success" id="sim-btn" onclick="startLiveRound()">⚽ Start Live Speelronde</button>
+                </div>
             </div>
         </div>
 
-        <!-- TAB 5: STATS -->
+        <!-- TAB 5: UITSLAGEN -->
+        <div id="tab-results" class="tab-content">
+            <div class="card">
+                <h2>📋 Uitslagen & Tijdverloop</h2>
+                <div id="results-history">
+                    <p style="font-size:0.8rem; color:var(--text-muted);">Nog geen gespeelde wedstrijden.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 6: STATS -->
         <div id="tab-stats" class="tab-content">
             <div class="card">
                 <h2>⚽ Topscorers</h2>
@@ -399,7 +417,7 @@
             </div>
         </div>
 
-        <!-- TAB 6: SPELERS PER TEAM -->
+        <!-- TAB 7: SPELERS PER TEAM -->
         <div id="tab-players" class="tab-content">
             <div class="card">
                 <h2>Selecties & Statistieken</h2>
@@ -422,7 +440,7 @@
             </div>
         </div>
 
-        <!-- TAB 7: TRANSFERS -->
+        <!-- TAB 8: TRANSFERS -->
         <div id="tab-transfers" class="tab-content">
             <div class="card">
                 <h2>Transfermarkt</h2>
@@ -434,17 +452,17 @@
             </div>
         </div>
 
-        <!-- TAB 8: KNUFFELKRANT -->
+        <!-- TAB 9: KNUFFELKRANT -->
         <div id="tab-newspaper" class="tab-content">
             <div id="newspaper-container">
                 <div class="newspaper-card">
                     <div class="newspaper-title">📰 DE KNUFFELKRANT - Editie 0</div>
-                    <p style="font-size: 0.85rem;">Welkom bij het nieuwe seizoen! De voorbereidingen zijn in volle gang. Binnenkort lees je hier de smeuïgste anekdotes, interviews en analyses per speelronde!</p>
+                    <p style="font-size: 0.85rem;">Welkom bij het nieuwe seizoen! Zodra de draft afgerond is en de wedstrijden beginnen, lees je hier alle verhalen!</p>
                 </div>
             </div>
         </div>
 
-        <!-- TAB 9: CHAMPIONS LEAGUE -->
+        <!-- TAB 10: CHAMPIONS LEAGUE -->
         <div id="tab-cl" class="tab-content">
             <div class="card">
                 <h2>🏆 Knuffel Champions League</h2>
@@ -463,7 +481,8 @@
         <button class="active" onclick="switchTab('setup', this)">⚙️<br>Setup</button>
         <button onclick="switchTab('stand', this)">📊<br>Stand</button>
         <button onclick="switchTab('program', this)">📅<br>Programma</button>
-        <button onclick="switchTab('results', this)">⚽<br>Uitslagen</button>
+        <button onclick="switchTab('live', this)">⏱️<br>Live</button>
+        <button onclick="switchTab('results', this)">📋<br>Uitslagen</button>
         <button onclick="switchTab('stats', this)">📈<br>Stats</button>
         <button onclick="switchTab('players', this)">🧸<br>Spelers</button>
         <button onclick="switchTab('transfers', this)">🔄<br>Transfers</button>
@@ -480,8 +499,7 @@
             currentRound: 1,
             standings: [],
             simSpeed: 800,
-            isSimulating: false,
-            newspapers: []
+            isSimulating: false
         };
 
         const TEAM_NAMES = [
@@ -490,10 +508,6 @@
         ];
 
         const POSITIONS = ["GK", "DEF", "MID", "ATT"];
-
-        window.onload = function() {
-            autoFillPlushies();
-        };
 
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -567,6 +581,11 @@
         function renderSetupPlushies() {
             document.getElementById('plushie-count').innerText = state.plushies.length;
             const container = document.getElementById('plushie-list-container');
+            if (state.plushies.length === 0) {
+                container.innerHTML = '<p style="font-size:0.8rem; color:var(--text-muted); text-align:center; padding:15px;">Nog geen knuffels toegevoegd.</p>';
+                return;
+            }
+
             container.innerHTML = state.plushies.map(p => `
                 <div style="display:flex; justify-content:space-between; align-items:center; padding:5px 0; border-bottom:1px solid var(--border); font-size:0.8rem;">
                     <span><strong>${p.name}</strong> <span class="badge">Rat: ${p.rating}</span></span>
@@ -578,6 +597,23 @@
         function removePlushie(id) {
             state.plushies = state.plushies.filter(p => p.id !== id);
             renderSetupPlushies();
+        }
+
+        function renderDraftTeamsOverview() {
+            const overview = document.getElementById('draft-teams-overview');
+            overview.style.display = 'grid';
+            overview.innerHTML = state.teams.map(team => {
+                const teamPlayers = state.plushies.filter(p => p.teamId === team.id);
+                return `
+                    <div class="draft-team-card">
+                        <h4>${team.name}</h4>
+                        ${POSITIONS.map(pos => {
+                            const p = teamPlayers.find(x => x.position === pos);
+                            return `<div><span class="badge-pos">${pos}</span>${p ? p.name : '<em>...</em>'}</div>`;
+                        }).join('')}
+                    </div>
+                `;
+            }).join('');
         }
 
         function startDraft() {
@@ -594,24 +630,28 @@
             state.teams = TEAM_NAMES.map((name, idx) => ({ id: idx + 1, name: name }));
             let shuffled = [...state.plushies].sort(() => 0.5 - Math.random());
 
+            renderDraftTeamsOverview();
+
             let idx = 0;
             function draftTick() {
                 if (idx < 32) {
                     let p = shuffled[idx];
                     let teamIndex = idx % 8;
                     let team = state.teams[teamIndex];
-                    let posIndex = Math.floor(idx / 8); // 0: GK, 1: DEF, 2: MID, 3: ATT
+                    let posIndex = Math.floor(idx / 8); 
                     let pos = POSITIONS[posIndex];
 
                     p.teamId = team.id;
                     p.position = pos;
 
                     document.getElementById('draft-text').innerHTML = `
-                        🎲 <strong>${p.name}</strong> (Rating: ${p.rating}) gaat als <span class="badge-pos">${pos}</span> naar <strong>${team.name}</strong>!
+                        🎲 <strong>${p.name}</strong> (Rating: ${p.rating}) ➔ <strong>${team.name}</strong> (<span class="badge-pos">${pos}</span>)
                     `;
 
+                    renderDraftTeamsOverview();
+
                     idx++;
-                    setTimeout(draftTick, 200);
+                    setTimeout(draftTick, 1000); // Exact 1 seconde vertraging
                 } else {
                     document.getElementById('draft-text').innerHTML = `🎉 <strong>Alle knuffels zijn verdeeld! Competitie gestart.</strong>`;
                     state.standings = state.teams.map(t => ({
@@ -623,7 +663,7 @@
                     populateTeamFilter();
                     renderAllRounds();
                     document.getElementById('league-status').innerText = 'Status: Seizoen Bezig';
-                    setTimeout(() => switchTab('stand'), 1200);
+                    setTimeout(() => switchTab('stand'), 1500);
                 }
             }
 
@@ -635,7 +675,7 @@
             for (let round = 0; round < 7; round++) {
                 let matches = [];
                 for (let i = 0; i < 4; i++) {
-                    matches.push({ home: ids[i], away: ids[7 - i], homeScore: 0, awayScore: 0, played: false });
+                    matches.push({ home: ids[i], away: ids[7 - i], homeScore: 0, awayScore: 0, played: false, events: [] });
                 }
                 state.schedule.push(matches);
                 ids.splice(1, 0, ids.pop());
@@ -694,14 +734,33 @@
             function tick() {
                 document.getElementById('live-minute').innerText = minute;
 
-                // Render live scores grid
-                document.getElementById('live-scores-grid').innerHTML = matches.map(m => {
+                // Render Live Center Details (inclusief opstellingen/selecties en live gebeurtenissen)
+                document.getElementById('live-matches-detail-container').innerHTML = matches.map(m => {
                     const home = state.teams.find(t => t.id === m.home);
                     const away = state.teams.find(t => t.id === m.away);
+                    const homePlayers = state.plushies.filter(p => p.teamId === m.home);
+                    const awayPlayers = state.plushies.filter(p => p.teamId === m.away);
+
+                    const recentEvents = m.events.slice(-3).reverse();
+
                     return `
-                        <div class="live-score-item">
-                            <div>${home.name} vs ${away.name}</div>
-                            <div style="font-size:1.1rem; font-weight:bold; color:#10b981;">${m.homeScore} - ${m.awayScore}</div>
+                        <div style="background:#1e293b; padding:10px; border-radius:8px; margin-top:8px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; font-weight:bold;">
+                                <span>${home.name}</span>
+                                <span style="font-size:1.2rem; color:#10b981;">${m.homeScore} - ${m.awayScore}</span>
+                                <span>${away.name}</span>
+                            </div>
+                            
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:0.7rem; color:#94a3b8; margin:6px 0; border-top:1px solid #334155; padding-top:4px;">
+                                <div><strong>Opstelling:</strong> ${homePlayers.map(p=>p.name.split(' ')[0]).join(', ')}</div>
+                                <div style="text-align:right;"><strong>Opstelling:</strong> ${awayPlayers.map(p=>p.name.split(' ')[0]).join(', ')}</div>
+                            </div>
+
+                            <div style="font-size:0.75rem; background:#0f172a; padding:6px; border-radius:4px; min-height:40px;">
+                                ${recentEvents.length > 0 
+                                    ? recentEvents.map(e => `<div>${e.min}' ${e.icon}${e.text}</div>`).join('') 
+                                    : '<span style="color:#64748b;">Wedstrijd onderweg...</span>'}
+                            </div>
                         </div>
                     `;
                 }).join('');
@@ -712,35 +771,51 @@
                     const homeTeam = state.teams.find(t => t.id === m.home);
                     const awayTeam = state.teams.find(t => t.id === m.away);
 
-                    // Event roll
-                    if (Math.random() < 0.08) {
+                    // Event kansen
+                    if (Math.random() < 0.09) {
                         const isHome = Math.random() < 0.55;
                         const attacker = isHome ? homePlayers.find(p => p.position === 'ATT') || homePlayers[0] : awayPlayers.find(p => p.position === 'ATT') || awayPlayers[0];
                         const assister = isHome ? homePlayers.find(p => p.position === 'MID') : awayPlayers.find(p => p.position === 'MID');
+                        const teamName = isHome ? homeTeam.name : awayTeam.name;
 
-                        // Goal (35%)
-                        if (Math.random() < 0.35) {
+                        const roll = Math.random();
+                        // Goal (30%)
+                        if (roll < 0.30) {
                             if (isHome) m.homeScore++; else m.awayScore++;
                             attacker.goals++;
                             if (assister) assister.assists++;
 
-                            const logMsg = `⚽ GOAL (${minute}')! ${attacker.name} scoort voor ${isHome ? homeTeam.name : awayTeam.name}!`;
-                            m.events.push(logMsg);
-                            document.getElementById('live-ticker').innerText = logMsg;
+                            m.events.push({
+                                min: minute,
+                                icon: '⚽',
+                                text: `<strong>GOAL!</strong> ${attacker.name} (${teamName})`
+                            });
                         } 
-                        // Card (15%)
-                        else if (Math.random() < 0.15) {
+                        // Kans (35%)
+                        else if (roll < 0.65) {
+                            m.events.push({
+                                min: minute,
+                                icon: '🎯',
+                                text: `Grote kans voor ${attacker.name} (${teamName}), maar gemist!`
+                            });
+                        }
+                        // Kaarten (20%)
+                        else if (roll < 0.85) {
                             const defender = isHome ? homePlayers.find(p => p.position === 'DEF') || homePlayers[1] : awayPlayers.find(p => p.position === 'DEF') || awayPlayers[1];
                             if (Math.random() < 0.8) {
                                 defender.yellowCards++;
-                                const logMsg = `🟨 Gele kaart (${minute}') voor ${defender.name} (${isHome ? homeTeam.name : awayTeam.name})`;
-                                m.events.push(logMsg);
-                                document.getElementById('live-ticker').innerText = logMsg;
+                                m.events.push({
+                                    min: minute,
+                                    icon: '🟨',
+                                    text: `Gele kaart voor ${defender.name} (${teamName})`
+                                });
                             } else {
                                 defender.redCards++;
-                                const logMsg = `🟥 RODE KAART (${minute}')! ${defender.name} moet van het veld!`;
-                                m.events.push(logMsg);
-                                document.getElementById('live-ticker').innerText = logMsg;
+                                m.events.push({
+                                    min: minute,
+                                    icon: '🟥',
+                                    text: `<strong>RODE KAART!</strong> ${defender.name} (${teamName})`
+                                });
                             }
                         }
                     }
@@ -789,19 +864,37 @@
             // Krant editie genereren
             generateNewspaper(matches);
 
-            // History uitslagen
+            // History uitslagen met tijdverloop
             const history = document.getElementById('results-history');
-            let roundHTML = `<h3>Uitslagen Speelronde ${state.currentRound}</h3>`;
+            let roundHTML = `<h3 style="margin:12px 0 6px 0; font-size:0.95rem;">Speelronde ${state.currentRound}</h3>`;
             matches.forEach(m => {
                 const home = state.teams.find(t => t.id === m.home);
                 const away = state.teams.find(t => t.id === m.away);
+                
+                let timelineHTML = m.events.map(e => `
+                    <div class="timeline-event">
+                        <span style="font-weight:bold; min-width:25px;">${e.min}'</span>
+                        <span>${e.icon}</span>
+                        <span>${e.text}</span>
+                    </div>
+                `).join('');
+
+                if (m.events.length === 0) {
+                    timelineHTML = '<div class="timeline-event" style="color:var(--text-muted);">Geen hoogtepunten deze wedstrijd.</div>';
+                }
+
                 roundHTML += `
                     <div class="match-card">
-                        <div class="match-header"><span>${home.name} - ${away.name}</span> <span>${m.homeScore} - ${m.awayScore}</span></div>
-                        <div class="match-detail">${m.events.length > 0 ? m.events.join('<br>') : 'Geen bijzondere voorvallen.'}</div>
+                        <div class="match-header">
+                            <span>${home.name} - ${away.name}</span>
+                            <span style="color:var(--primary);">${m.homeScore} - ${m.awayScore}</span>
+                        </div>
+                        <div style="margin-top:6px;">${timelineHTML}</div>
                     </div>
                 `;
             });
+
+            if (state.currentRound === 1) history.innerHTML = '';
             history.innerHTML = roundHTML + history.innerHTML;
 
             // Transfer checks
@@ -817,7 +910,6 @@
                 document.getElementById('sim-btn').disabled = true;
                 document.getElementById('sim-btn').innerText = "Seizoen Afgelopen";
 
-                // Speler van het Seizoen verkiezen
                 electPlayerOfTheSeason();
             }
 
@@ -891,7 +983,7 @@
                         <td><span class="badge-pos">${p.position}</span></td>
                         <td><strong>${p.name}</strong></td>
                         <td>${p.rating}</td>
-                        <td><span class="badge badge-green">+${prog}</span></td>
+                        <td><span class="badge" style="background:#d1fae5; color:#065f46;">+${prog}</span></td>
                         <td>${p.goals}</td>
                         <td>${p.assists}</td>
                         <td>${p.yellowCards}</td>
