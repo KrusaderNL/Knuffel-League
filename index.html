@@ -437,7 +437,7 @@
             </div>
 
             <div class="card">
-                <h2>🧤 Clean Sheets (Uitsluitend Keepers)</h2>
+                <h2>🧤 Clean Sheets</h2>
                 <table>
                     <thead>
                         <tr><th>#</th><th>Keeper</th><th>Team</th><th>Clean Sheets</th></tr>
@@ -533,6 +533,9 @@
             isSimulating: false
         };
 
+        const POSITIONS = ["GK", "DEF", "MID", "ATT"];
+        const POS_ORDER = { "GK": 1, "DEF": 2, "MID": 3, "ATT": 4 };
+
         const ALL_TEAM_NAMES = [
             "FC Pluche", "De Zachte Wolven", "VV Donzig", "Katoen United",
             "Real Wollig", "SC Knuffel", "Sporting Stof", "Dynamo Pluis",
@@ -565,16 +568,35 @@
         ];
 
         const ANECDOTES_POOL = [
-            { title: "Snoepautomaat Drama", text: "werd vlak voor de aftrap betrapt bij de snoepautomaat. Na het verorberen van drie zakjes gummibeertjes speelde de speler de wedstrijd van z'n leven." },
-            { title: "Geluks-Strikje Vermist", text: "weigerde aanvankelijk het veld te betreden omdat het rode geluks-strikje kwijt was. Pas nadat de materiaalman een veters strikte als vervanging werd de kleedkamer uitgelopen." },
-            { title: "De Vlinder-Incident", text: "vergat tijdens een cruciale tegenaanval de bal en besloot een zeldzame gele vlinder achteraan te rennen over de zijlijn." },
-            { title: "Acrobatische Jubel", text: "Scoorde op fenomenale wijze en trakteerde het publiek vervolgens op een drievoudige salto, waarna er helaas wel een naadje op de rug losraakte." },
-            { title: "Tactische Nickerchen", text: "ging tijdens de rust op de massagetafel liggen en viel zo diep in slaap dat er drie emmers koud water nodig waren om de knuffel weer wakker te krijgen." },
-            { title: "Katoenen Protest", text: "was het niet eens met een beslissing van de scheidsrechter en ging demonstratief met de armen over elkaar midden op de middenstip zitten." },
-            { title: "Het Wasmachine Mysterie", text: "kwam overduidelijk vers uit de wasverzachter het veld op. De tegenstanders klaagden over 'illegaal lekkere lavendellucht' tijdens de duels." }
+            { 
+                title: "Snoepautomaat Drama in de Rust", 
+                text: "werd vlak voor de aftrap betrapt bij de snoepautomaat in de kantine. Na het verorberen van drie zakjes gummibeertjes en een fristi speelde de knuffel de wedstrijd van z'n leven." 
+            },
+            { 
+                title: "Het Vermiste Geluks-Strikje", 
+                text: "weigerde aanvankelijk het veld te betreden omdat het vertrouwde rode geluks-strikje kwijt was in de wasmand. Pas toen de materiaalman een veters strikte als vervanging, stapte de speler het veld op." 
+            },
+            { 
+                title: "De Vlinder-Aantal-Incident", 
+                text: "vergat tijdens een cruciale tegenaanval de bal en besloot een zeldzame gele vlinder achteraan te rennen over de zijlijn." 
+            },
+            { 
+                title: "Acrobatische Jubel met Schade", 
+                text: "scoorde op fenomenale wijze en trakteerde het publiek op een drievoudige salto. Helaas liet een naadje op de rug los waardoor er wat vulling op het veld achterbleef." 
+            },
+            { 
+                title: "Tactische Nickerchen", 
+                text: "ging tijdens de rust op de massagetafel liggen voor een korte recuperatie en viel zo diep in slaap dat er koud water nodig was om de knuffel wakker te krijgen." 
+            }
         ];
 
-        const POSITIONS = ["GK", "DEF", "MID", "ATT"];
+        const EXTRA_NEWS_POOL = [
+            "Supporters van de thuisclub gooiden massaal donzige kussentjes op het veld uit protest tegen een vermeende overtreding op de keeper.",
+            "De mascotte van de bezoekers raakte tijdens de rust verstrikt in het voorzetnet en moest door de brandweer bevrijd worden.",
+            "Een verhit bestuurscconflict bij het uitteam zorgde voor vertraging; de voorzitter weigerde de kleedkamer op slot te doen.",
+            "De veldmeester klaagde na de wedstrijd over 'overmatige pluisvorming' in het strafschopgebied.",
+            "Een groep meegereisde fanatieke supporters zong 90 minuten lang ononderbroken clubliederen vanaf de tribune."
+        ];
 
         function switchTab(tabId, btn) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -618,8 +640,6 @@
 
             let currentNames = state.plushies.map(p => p.name);
             let availableNames = EXTENDED_PLUSHIE_NAMES.filter(n => !currentNames.includes(n));
-            
-            // Shuffle
             availableNames.sort(() => 0.5 - Math.random());
 
             while (state.plushies.length < 32) {
@@ -693,7 +713,6 @@
             document.getElementById('start-draft-btn').style.display = 'none';
             document.getElementById('draft-live-area').style.display = 'block';
 
-            // Kies 8 willekeurige teamnamen uit de uitgebreide lijst
             let shuffledTeamNames = [...ALL_TEAM_NAMES].sort(() => 0.5 - Math.random()).slice(0, 8);
             state.teams = shuffledTeamNames.map((name, idx) => ({ id: idx + 1, name: name }));
 
@@ -720,7 +739,7 @@
                     renderDraftTeamsOverview();
 
                     idx++;
-                    setTimeout(draftTick, 2000); // Vertraagd naar 2 seconden per speler
+                    setTimeout(draftTick, 2000);
                 } else {
                     document.getElementById('draft-text').innerHTML = `🎉 <strong>Alle knuffels zijn verdeeld! Competitie gestart.</strong>`;
                     state.standings = state.teams.map(t => ({
@@ -793,7 +812,6 @@
             document.getElementById('sim-btn').disabled = true;
             document.getElementById('live-container').style.display = 'block';
 
-            // Reset schorsingen/rode kaarten status voor deze speelronde
             state.plushies.forEach(p => p.isSentOff = false);
 
             let minute = 1;
@@ -807,12 +825,15 @@
             function tick() {
                 document.getElementById('live-minute').innerText = minute;
 
-                // Render Live Center Details met VOLLEDIGE spelersnamen en posities netjes geordend
                 document.getElementById('live-matches-detail-container').innerHTML = matches.map(m => {
                     const home = state.teams.find(t => t.id === m.home);
                     const away = state.teams.find(t => t.id === m.away);
-                    const homePlayers = state.plushies.filter(p => p.teamId === m.home);
-                    const awayPlayers = state.plushies.filter(p => p.teamId === m.away);
+                    
+                    // SORTEREN OP POSITIE (GK -> DEF -> MID -> ATT)
+                    const homePlayers = state.plushies.filter(p => p.teamId === m.home)
+                        .sort((a,b) => POS_ORDER[a.position] - POS_ORDER[b.position]);
+                    const awayPlayers = state.plushies.filter(p => p.teamId === m.away)
+                        .sort((a,b) => POS_ORDER[a.position] - POS_ORDER[b.position]);
 
                     const recentEvents = m.events.slice(-3).reverse();
 
@@ -826,7 +847,7 @@
                             
                             <div class="lineup-grid">
                                 <div class="lineup-col">
-                                    <strong style="color:#94a3b8; font-size:0.75rem;">Opstelling ${home.name}:</strong>
+                                    <strong style="color:#94a3b8; font-size:0.75rem;">Opst. ${home.name}:</strong>
                                     <ul>
                                         ${homePlayers.map(p => `
                                             <li style="${p.isSentOff ? 'text-decoration:line-through; opacity:0.5;' : ''}">
@@ -836,7 +857,7 @@
                                     </ul>
                                 </div>
                                 <div class="lineup-col" style="text-align:right;">
-                                    <strong style="color:#94a3b8; font-size:0.75rem;">Opstelling ${away.name}:</strong>
+                                    <strong style="color:#94a3b8; font-size:0.75rem;">Opst. ${away.name}:</strong>
                                     <ul>
                                         ${awayPlayers.map(p => `
                                             <li style="justify-content:flex-end; ${p.isSentOff ? 'text-decoration:line-through; opacity:0.5;' : ''}">
@@ -857,13 +878,11 @@
                 }).join('');
 
                 matches.forEach(m => {
-                    // Alleen actieve (niet weggestuurde) spelers nemen deel
                     const activeHomePlayers = state.plushies.filter(p => p.teamId === m.home && !p.isSentOff);
                     const activeAwayPlayers = state.plushies.filter(p => p.teamId === m.away && !p.isSentOff);
                     const homeTeam = state.teams.find(t => t.id === m.home);
                     const awayTeam = state.teams.find(t => t.id === m.away);
 
-                    // Event kansen
                     if (Math.random() < 0.09) {
                         const isHome = Math.random() < 0.55;
                         const activeList = isHome ? activeHomePlayers : activeAwayPlayers;
@@ -875,7 +894,6 @@
                         const teamName = isHome ? homeTeam.name : awayTeam.name;
 
                         const roll = Math.random();
-                        // Goal (30%)
                         if (roll < 0.30) {
                             if (isHome) m.homeScore++; else m.awayScore++;
                             attacker.goals++;
@@ -887,7 +905,6 @@
                                 text: `<strong>GOAL!</strong> ${attacker.name} (${teamName})`
                             });
                         } 
-                        // Kans (35%)
                         else if (roll < 0.65) {
                             m.events.push({
                                 min: minute,
@@ -895,15 +912,11 @@
                                 text: `Grote kans voor ${attacker.name} (${teamName}), maar gemist!`
                             });
                         }
-                        // Overtredingen & Kaarten (20%)
                         else if (roll < 0.85) {
                             const offender = activeList.find(p => p.position === 'DEF') || activeList[Math.floor(Math.random() * activeList.length)];
-                            
-                            // Check gele/rode kaarten in deze specifieke wedstrijd
                             let yellowCountInMatch = m.events.filter(e => e.playerId === offender.id && e.icon === '🟨').length;
 
                             if (yellowCountInMatch === 1) {
-                                // 2e Gele kaart -> Rood en speler moet er af!
                                 offender.yellowCards++;
                                 offender.redCards++;
                                 offender.isSentOff = true;
@@ -915,7 +928,6 @@
                                     text: `<strong>2e GELE KAART = ROOD!</strong> ${offender.name} (${teamName}) moet het veld verlaten!`
                                 });
                             } else {
-                                // 1e Gele kaart
                                 offender.yellowCards++;
                                 m.events.push({
                                     min: minute,
@@ -947,7 +959,6 @@
             matches.forEach(m => {
                 m.played = true;
 
-                // Clean Sheets check keepers
                 if (m.awayScore === 0) {
                     const keeper = state.plushies.find(p => p.teamId === m.home && p.position === 'GK');
                     if (keeper) keeper.cleanSheets++;
@@ -961,21 +972,14 @@
                 updateStanding(m.away, m.awayScore, m.homeScore);
             });
 
-            // Player progress
             state.plushies.forEach(p => {
                 if (p.rating < p.potential && Math.random() < 0.4) {
                     p.rating += 1;
                 }
             });
 
-            // Krant editie genereren
             generateNewspaper(matches);
 
-            // Update dropdown voor uitslagen
-            setupResultsRoundFilter();
-            renderResultsHistory();
-
-            // Transfer checks
             if (state.currentRound === 7 || state.currentRound === 14) {
                 document.getElementById('transfer-btn').disabled = false;
                 document.getElementById('transfer-info').innerText = `⚠️ Transfervenster geopend (Speelronde ${state.currentRound})!`;
@@ -991,7 +995,14 @@
                 electPlayerOfTheSeason();
             }
 
+            // OPHOGEN RONDE EN DIRECT FILTER/RESULTS UPDATEN
+            const completedRound = state.currentRound;
             state.currentRound++;
+            
+            setupResultsRoundFilter();
+            document.getElementById('results-round-filter').value = completedRound;
+            renderResultsHistory();
+
             updateStandingsTable();
             renderStats();
             renderTeamPlayers();
@@ -1004,7 +1015,6 @@
             for (let i = 1; i < state.currentRound; i++) {
                 select.innerHTML += `<option value="${i}">Speelronde ${i}</option>`;
             }
-            select.value = state.currentRound - 1;
         }
 
         function renderResultsHistory() {
@@ -1089,8 +1099,8 @@
                 return `<tr><td>${idx+1}</td><td>${p.name}</td><td>${team ? team.name : '-'}</td><td><strong>${p.assists}</strong></td></tr>`;
             }).join('');
 
-            // FILTER: Uitsluitend Keepers (GK)
-            let sortedCS = [...state.plushies].filter(p => p.position === 'GK').sort((a,b) => b.cleanSheets - a.cleanSheets);
+            // TOP 5 KEEPERS MET CLEAN SHEETS
+            let sortedCS = [...state.plushies].filter(p => p.position === 'GK').sort((a,b) => b.cleanSheets - a.cleanSheets).slice(0, 5);
             document.getElementById('cleansheets-body').innerHTML = sortedCS.map((p, idx) => {
                 const team = state.teams.find(t => t.id === p.teamId);
                 return `<tr><td>${idx+1}</td><td>${p.name}</td><td>${team ? team.name : '-'}</td><td><strong>${p.cleanSheets}</strong></td></tr>`;
@@ -1105,7 +1115,10 @@
 
         function renderTeamPlayers() {
             const teamId = parseInt(document.getElementById('team-select-filter').value);
-            const players = state.plushies.filter(p => p.teamId === teamId);
+            
+            // SPELERS SORTEREN OP POSITIE (GK -> DEF -> MID -> ATT)
+            const players = state.plushies.filter(p => p.teamId === teamId)
+                .sort((a,b) => POS_ORDER[a.position] - POS_ORDER[b.position]);
 
             document.getElementById('team-players-body').innerHTML = players.map(p => {
                 const prog = p.rating - p.startRating;
@@ -1129,9 +1142,9 @@
         function generateNewspaper(matches) {
             const randomPlayer = state.plushies[Math.floor(Math.random() * state.plushies.length)];
             const randomAnecdoteObj = ANECDOTES_POOL[Math.floor(Math.random() * ANECDOTES_POOL.length)];
+            const extraNews = EXTRA_NEWS_POOL[Math.floor(Math.random() * EXTRA_NEWS_POOL.length)];
             const team = state.teams.find(t => t.id === randomPlayer.teamId);
 
-            // Vind de meest doelpuntrijke wedstrijd van de ronde
             let matchOfTheRound = [...matches].sort((a,b) => (b.homeScore + b.awayScore) - (a.homeScore + a.awayScore))[0];
             const home = state.teams.find(t => t.id === matchOfTheRound.home);
             const away = state.teams.find(t => t.id === matchOfTheRound.away);
@@ -1143,13 +1156,20 @@
                     
                     <h3 style="font-size:0.95rem; margin-top:6px; color:#1e293b;">🔥 Krantenkop: Spectakelstuk tussen ${home.name} en ${away.name}!</h3>
                     <p style="font-size:0.83rem; margin-top:4px; line-height:1.4;">
-                        Wat een wedstrijd! De supporters op de tribune gingen helemaal uit hun dak tijdens de ontmoeting tussen <strong>${home.name}</strong> en <strong>${away.name}</strong>. Met een uiteindelijke uitslag van <strong>${matchOfTheRound.homeScore} - ${matchOfTheRound.awayScore}</strong> werd er volop gestreden voor elke meter katoen. Analisten spreken nu al van een van de meest gedenkwaardige duels van het seizoen.
+                        Wat een wedstrijd! De supporters op de tribune gingen helemaal uit hun dak tijdens de ontmoeting tussen <strong>${home.name}</strong> en <strong>${away.name}</strong>. Met een uitslag van <strong>${matchOfTheRound.homeScore} - ${matchOfTheRound.awayScore}</strong> werd er volop gestreden voor elke meter katoen.
                     </p>
 
                     <div style="background:#fefce8; border-left:3px solid #f59e0b; padding:8px; margin:10px 0; border-radius:4px;">
-                        <h4 style="font-size:0.85rem; color:#92400e;">🧸 Opvallende Anekdote: ${randomAnecdoteObj.title}</h4>
+                        <h4 style="font-size:0.85rem; color:#92400e;">🧸 Opvallend Incident: ${randomAnecdoteObj.title}</h4>
                         <p style="font-size:0.8rem; color:#451a03; margin-top:3px;">
                             Speler <strong>${randomPlayer.name}</strong> van <strong>${team.name}</strong> ${randomAnecdoteObj.text}
+                        </p>
+                    </div>
+
+                    <div style="background:#f1f5f9; border-left:3px solid #64748b; padding:8px; margin:10px 0; border-radius:4px;">
+                        <h4 style="font-size:0.85rem; color:#334155;">📣 Tribune & Achterklap:</h4>
+                        <p style="font-size:0.8rem; color:#1e293b; margin-top:3px;">
+                            ${extraNews}
                         </p>
                     </div>
 
@@ -1204,7 +1224,6 @@
             let sorted = [...state.standings].sort((a,b) => b.points - a.points);
             let top2 = sorted.slice(0, 2).map(s => state.teams.find(t => t.id === s.teamId));
 
-            // Selecteer willekeurig 6 internationale tegenstanders
             let shuffledIntTeams = [...CL_POOL_TEAMS].sort(() => 0.5 - Math.random()).slice(0, 6);
 
             const clTeams = [
